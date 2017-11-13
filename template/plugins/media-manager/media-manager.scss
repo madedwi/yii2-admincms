@@ -1,0 +1,117 @@
+.sp-mediamanager{
+    .modal-lg{
+        width:90%;
+    }
+
+    .modal-content .modal-body {
+        min-height: 400px;
+    }
+
+    .modal-content .modal-body>div>#folder-content {
+        height: 400px;
+        border-right: 1px solid #ccc;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+        .thumb-container{
+            margin-bottom: 20px;
+            border: 1px solid #fff;
+            cursor: pointer;
+            padding-bottom: 10px;
+            padding-top: 10px;
+
+            .thumbnail{
+                border:none;
+                margin-bottom: 10px;
+            }
+            .thumbnail.folder{
+                background-image: url('icons/folder.png');
+                background-repeat: no-repeat;
+                background-position: center;
+                background-size: contain;
+                height: 120px;
+            }
+            img {
+                height: 120px;
+                margin-left: auto;
+                margin-right: auto;
+                display: block;
+            }
+
+            .caption>p{
+                text-align: center;
+                line-height: 0px;
+            }
+        }
+
+        .thumb-container:hover{
+            border-bottom: 1px solid #2dc3e8;
+        }
+
+        .thumb-container.selected{
+            border: 1px solid #2dc3e8;
+        }
+
+        #form-new-folder-container{
+            width: 300px;
+            display: block;
+            background-color: #fff;
+            margin: 0 auto;
+            top: 0px;
+            right: 0;
+            left: 0;
+            padding: 10px 15px;
+            position: absolute;
+            box-shadow: 0 0 10px rgba(0,0,0,.5)
+        }
+
+    }
+
+    .modal-content .modal-body>div>#file-information{
+        #sp-mediamanager-detail .thumbnail{
+            height: 230px;
+        }
+        #sp-mediamanager-detail .thumbnail img.img-responsive{
+            max-height: 200px;
+            vertical-align: middle;
+        }
+    }
+
+    .btn.btn-link.btn-loader{
+        text-decoration: none;
+        color:#000 !important;
+    }
+
+    img{
+
+        .type-excel, .type-folder, .type-pdf, .type-word{
+            background-repeat: no-repeat;
+            background-position: center center;
+            background-size: contain;
+        }
+
+        .type-excel {
+            background-image: url('icon/excel.png');
+        }
+        .type-folder {
+            background-image: url('icon/folder.png');
+        }
+        .type-pdf {
+            background-image: url('icon/pdf.png');
+        }
+        .type-word {
+            background-image: url('icon/word.png');
+        }
+    }
+
+    .modal-footer{
+        .btn-group.detail-btn{
+            margin-right: 10px;
+        }
+        .btn-group.create-btn{
+            margin-left: 10px;
+        }
+    }
+
+
+}
