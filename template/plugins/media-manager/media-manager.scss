@@ -3,6 +3,12 @@
         width:90%;
     }
 
+    .modal-header {
+        .title-folder-name{
+            font-size: 16px;
+        }
+    }
+
     .modal-content .modal-body {
         min-height: 400px;
     }
@@ -71,6 +77,13 @@
         #sp-mediamanager-detail .thumbnail{
             height: 230px;
         }
+
+        #sp-mediamanager-detail .thumbnail.folder{
+            background-image: url('icons/folder.png');
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
         #sp-mediamanager-detail .thumbnail img.img-responsive{
             max-height: 200px;
             vertical-align: middle;

@@ -38,12 +38,15 @@
             mmevent.request().upload(fromData).done(function(data, message, jqxhr){
                 mmevent.request().loadfolder(mmoptions.currentFolder);
             }).fail(function(message){
-
+                alert(message);
             });
         }).on('dblclick', '.thumbnail.folder', function(e){
             let path = $(this).attr('path');
             mmevent.request().loadfolder(path);
+        }).on('click', '.thumbnail.folder', function(e){
+
         }).on('click', '#sp-create-new-folder', function(e){
+
             let formTemplate =  '<div id="form-new-folder-container">'+
                                     '<form id="sp-form-new-folder">'+
                                         '<div class="form-group">'+
@@ -59,6 +62,13 @@
             let folderPath = mmoptions.currentFolder +'/' + $('#sp-new-folder-name').val();
             mmevent.request().createFolder(folderPath);
             return false;
+
+        }).on('blur', '#sp-form-new-folder', function(e){
+            let elm = $('.modal #folder-content').find('#form-new-folder-container');
+            if(elm.length){
+                elm.remove();
+            }
+
         }).on('click', '#sp-btn-back-directory', function(e){
             e.preventDefault();
             if(mmoptions.currentFolder != mmoptions.basePath){
@@ -71,13 +81,21 @@
                 }
                 mmevent.request().loadfolder(path.join('/'));
             }
-        }).on('click', '.thumbnail.image-file', function(e){
-            let url = $(this).data('src'),
+        }).on('click', '.thumbnail.image-file, .thumbnail.folder', function(e){
+            let self = $(this),
+                isFolder = typeof self.data('src') == 'undefined',
+                url = !isFolder ? self.data('src') : self.attr('path'),
                 showUrl = url.replace('thumb', 'small'),
                 fname = $(this).parent().attr('fname'),
                 form = $('#sp-mediamanager-detail');
 
-            form.find('.thumbnail>img.img-responsive').attr('src', showUrl).removeClass('hidden');
+            if(isFolder){
+                form.find('.thumbnail').addClass('folder');
+                form.find('.thumbnail>img.img-responsive').addClass('hidden');
+            }else{
+                form.find('.thumbnail').removeClass('folder');
+                form.find('.thumbnail>img.img-responsive').attr('src', showUrl).removeClass('hidden');
+            }
             mmevent.request().get({
                 mode : 'file-detail',
                 path : url
@@ -266,8 +284,22 @@
                 }).done(function(data, message){
                     $('.modal #folder-content').html('');
                     mmoptions.currentFolder = data.currentfolder;
+                    $('.sp-mediamanager .modal-title').find('span.title-folder-name').remove();
+                    let form = $('#sp-mediamanager-detail');
+                    form.find('.thumbnail>img').addClass('hidden');
+                    form.find('#media-id').val('');
+                    form.find('#media-type').val('image');
+                    form.find('#media-fileurl').val('');
+                    form.find('#media-filename').val('');
+                    form.find('#media-title').val('');
+                    form.find('#media-alt').val('');
+                    form.find('#media-description').val('');
+
+
                     if(mmoptions.currentFolder != mmoptions.basePath){
                         $('#sp-btn-back-directory').removeClass('hidden');
+                        let folderName = mmoptions.currentFolder.replace(mmoptions.basePath, '');
+                        $('.sp-mediamanager .modal-title').append('<span class="title-folder-name"> &nbsp;&nbsp; ' + folderName + '<span>');
                     }else{
                         $('#sp-btn-back-directory').addClass('hidden');
                     }
@@ -309,7 +341,7 @@
                         mode        : 'create-folder',
                         folderpath  : folderPath
                     }).done(function(data, message){
-                        loadfolder(folderPath);
+                        req.loadfolder(folderPath);
                     }).fail(function(message){
                         alert(message);
                     });

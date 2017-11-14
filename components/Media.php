@@ -16,7 +16,6 @@ class Media extends \yii\base\Component{
     }
 
     public function getImageSizes(){
-        //{"large":{"mwidth":1200,"mheight":720},"medium":{"mwidth":720,"mheight":480},"small":{"mwidth":480,"mheight":260},"thumb":{"mwidth":150,"mheight":150}}
         $defaults = [
             /*
              size_key => [
@@ -33,9 +32,6 @@ class Media extends \yii\base\Component{
             ],
             'small' => [
                 'mwidth' => 480, 'mheight' => 260
-            ],
-            'thumb' => [
-                'mwidth' => 150, 'mheight' => 150
             ]
         ];
 

@@ -48,10 +48,6 @@ class MediaController extends Controller {
     }
 
     public function actionIndex(){
-        // $loadFolder = Yii::$app->request->get('loadfolder');
-        // $folderName = Yii::$app->request->get('fname');
-        // $filename   = Yii::$app->request->get('filename');
-        // $detail     = Yii::$app->request->get('detail');
         Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
         $mode = Yii::$app->request->get('mode');
         if(empty($mode)){
@@ -118,8 +114,7 @@ class MediaController extends Controller {
         $result = ['status' => false, 'message'=>'Folder not exists.'];
         try {
             $media          = new Media();
-            // $sizedFolder    = $media->loadImageSizes();
-            $sizedFolder = Yii::$app->getModule('administrator')->media->imageSizes;
+            $sizedFolder    = $media->imageSizes;
             $hiddenFolder   = ['.', '..'];
             if(!file_exists($folderPath)){
                 if(!\yii\helpers\FileHelper::createDirectory($folderPath)){
@@ -184,7 +179,7 @@ class MediaController extends Controller {
             $result = ['status'=>true, 'data'=>['files'=>$files, 'currentfolder'=>$folderName, 'folders'=>$folders]];
 
         } catch (\Exception $e) {
-            $result = ['status'=>false, 'message' => $e->getMessage()];
+            $result = ['status'=>false, 'message' => $e->getMessage() . ' - ' . $e->getFile() . ' - ' . $e->getLine()];
         }
 
         return $result;
@@ -194,12 +189,17 @@ class MediaController extends Controller {
     public function uploadFile(){
         $model = new Media();
         if(Yii::$app->request->isPost){
-            $model->sourceFiles = UploadedFile::getInstances($model, 'sourceFiles');
-            if ($model->load(Yii::$app->request->post()) && $model->upload()) {
-                // file is uploaded successfully
-                return ['status'=>true, 'data'=>[], 'message'=>'INI KEUPLOAD'];
-            }else{
-                return ['status'=>false, 'data'=>[], 'message'=>$model->firstErrors];
+            try {
+                $model->sourceFiles = UploadedFile::getInstances($model, 'sourceFiles');
+                if ($model->load(Yii::$app->request->post()) && $model->upload()) {
+                    return ['status'=>true, 'data'=>[], 'message'=>'INI KEUPLOAD'];
+                }else{
+                    // throw new \Exception($this->getFirstErrorMessage($model->firstErrors) . Yii::$app->params['max_file_upload_size']);
+                    throw new \Exception(json_encode($model->firstErrors));
+
+                }
+            } catch (\Exception $e) {
+                return ['status'=>false, 'data'=>[], 'message'=>$e->getMessage() . ' - ' .$e->getFile() . ' - ' . $e->getLine() ];
             }
         }
     }
@@ -221,31 +221,44 @@ class MediaController extends Controller {
             $model = new Media();
         }
 
-        if($model->load(Yii::$app->request->post()) && $model->save()){
-            return ['status'=>true, 'data'=>[], 'message'=>'File information has been saved.'];
-        }else {
-            return ['status'=>false, 'data'=>[], 'message'=>$model->firstErrors];
+        try {
+            if($model->load(Yii::$app->request->post()) && $model->save()){
+                return ['status'=>true, 'data'=>[], 'message'=>'File information has been saved.'];
+            }else {
+                throw new \Exception($this->getFirstErrorMessage($model->firstErrors));
+            }
+        } catch (\Exception $e) {
+            return ['status'=>false, 'data'=>[], 'message'=>$e->getMessage()];
         }
     }
 
     private function deleteFile($path){
         try {
+            $media  = new Media();
+
+            $path   = Yii::getAlias("@webroot/{$path}");
+            $path   = str_replace('//', '/', $path);
             $folder = dirname($path);
             $_split = explode('/', $path);
-            $filename = end($_split);
-            $deleted = [];
-            if(file_exists($path)) { unlink($path); $deleted[]=$path;}
-
-            $media          = new Media();
-            $sizedFolder    = $media->loadImageSizes();
+            $filename   = end($_split);
+            $deleted    = [];
+            if($media->deleteFileOrFolder($path)){
+                $deleted[]=$path;
+            }
+            $sizedFolder    = $media->imageSizes;
             foreach ($sizedFolder as $key => $wh) {
                 $path_x = "{$folder}/{$key}/{$filename}";
-                if(file_exists($path_x)) { unlink($path_x); $deleted[]=$path_x;}
+                if(file_exists($path_x)) {
+                    unlink($path_x); $deleted[]=$path_x;
+                }
             }
             return ['status'=>true, 'data'=>['deleted'=>$deleted], 'message'=>'File has been deleted.'];
         } catch (\Exception $e) {
-            return ['status'=>false, 'data'=>[], 'message'=>$e->getMessage() . ' Line ' . $e->getLine(), ];
+            return ['status'=>false, 'data'=>[], 'message'=>$e->getMessage() ];
         }
-        // return ['dirname'=>dirname($path), 'path'=>$path];
+    }
+
+    private function getFirstErrorMessage($errors){
+        return current($errors);
     }
 }

@@ -40,98 +40,15 @@ if($model->isNewRecord){
                             ])
                             ->widgetBody(['excludeCloseTag'=>true]);
                     ?>
-                        <?= $form->field($model, 'title')->textInput(['maxlength' => true, 'class'=>'form-control input-title slug-source', 'data'=>['slugspan'=>'.slugtext']]) ?>
+                        <?= $form->field($model, 'title')->textInput(['maxlength' => true, 'class'=>'form-control input-title slug-source', 'data'=>['slugspan'=>'.slugtext', 'createslug' => $model->isNewRecord]]) ?>
 
                         <?php // $form->field($model, 'slug')->textInput(['maxlength' => true]) ?>
-                        <div class="form-group">
-                            <label for="slug" class="control-label">Pretty Url</label>
-                            <p>
-                                <?php
-                                $expl   = explode('/', $slugFormat);
-                                $_expl  = [];
-                                $_i     = 0;
-                                foreach ($expl as $i=>$x) {
-                                    if(strpos($x, '-') !== false){
-                                        $_x = explode('-', $x);
-                                        foreach ($_x as $_xi) {
-                                            $_expl[$_i] = $_xi;
-                                            $_i++;
-                                        }
-                                        $_i--;
-                                    }else{
-                                        $_expl[$_i] = $x;
-                                    }
-                                    $_i ++;
-                                }
-
-                                $expl = $_expl;
-                                $text = [];
-                                $cx = [];
-                                $slugSegment = [];
-                                $currentSegment = 0;
-                                if(!empty($model->slug)){
-                                    $slugSegment = explode('/', $model->slug);
-                                }
-
-                                foreach ($expl as $slugKeyword) {
-                                    $c = "";
-                                    if($slugKeyword=="{[category]}"){
-                                        if(isset($slugSegment[$currentSegment]) && in_array($slugSegment[$currentSegment], $slugCategories)){
-                                            $textCategorySlug = $slugSegment[$currentSegment];
-                                        }if(count($slugCategories)==1){
-                                            $textCategorySlug = array_keys($slugCategories)[0];
-                                        }else{
-                                            $textCategorySlug = '{[categories]}';
-                                        }
-
-                                        $c = Html::tag('span',
-                                                    Html::tag('span', $textCategorySlug, ['class'=>'slug-click slug-segment', 'data'=>['input'=>'#slug-category']]) .
-                                                    Html::dropDownList('slug-category', null, $slugCategories, ['class'=>'slug-input hidden', 'id'=>'slug-category'])
-                                                );
-                                        $cx[] = $textCategorySlug;
-                                    }else if(strtolower($slugKeyword)=="{[publish_year]}"){
-                                        $textYearSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('Y');
-                                        $c = Html::tag('span', $textYearSlug, ['class'=>'slug-publishyear slug-segment']);
-                                        $cx[] = $textYearSlug;
-                                    }else if(strtolower($slugKeyword)=="{[publish_month_numeric]}"){
-                                        $textMonthSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('m');
-                                        $c = Html::tag('span', $textMonthSlug, ['class'=>'slug-publishmonthnumeric slug-segment']);
-                                        $cx[] = $textMonthSlug;
-                                    }else if(strtolower($slugKeyword)=="{[publish_month_name]}"){
-                                        $textMonthNameSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('F');
-                                        $c = Html::tag('span', $textMonthNameSlug, ['class'=>'slug-publishmonthnumeric slug-segment']);
-                                        $cx[] = $textMonthNameSlug;
-                                    }else if(strtolower($slugKeyword)=="{[slug]}"){
-                                        $slugText = '';
-                                        if($model->isNewRecord){
-                                            $slugText = 'slug-text';
-                                        }else if(isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment])){
-                                            $slugText = $slugSegment[$currentSegment];
-                                        }else{
-                                            $slugText = \admin\helpers\String::slugify($model->title);
-                                        }
-                                        $c = Html::tag('span',
-                                                    Html::tag('span', $slugText, ['class'=>'slug-click slug-segment', 'data'=>['input'=>'#slug-text']]) .
-                                                    Html::textInput('slug', $slugText, ['class'=>'slug-input hidden', 'id'=>'slug-text']),
-                                                    ['class'=>'slugtext']
-                                                );
-                                        $cx[] = $slugText;
-                                    }else{
-                                        $c = Html::tag('span', strtolower($slugKeyword), ['class'=>'slug-segment']);
-                                    }
-
-                                    $text[] = $c;
-                                    $currentSegment++;
-                                }
-                                echo $text = implode('/', $text);
-                                if(empty($model->slug)){
-                                    $model->slug = implode('/', $cx);
-                                }
-                                echo $form->field($model, 'slug')->hiddenInput(['class'=>'full-input-slug'])->label(false);
-                                ?>
-
-                            </p>
-                        </div>
+                        <?= $this->render('@admin/views/layouts/slug-input', [
+                                'form' => $form,
+                                'model' => $model,
+                                'attribute' => 'slug',
+                                'slugformat' => $slugFormat
+                            ])?>
 
                         <?= $form->field($model, 'content')->textarea(['rows' => 6, 'id'=>'page_content']) ?>
 
@@ -227,22 +144,28 @@ if($model->isNewRecord){
                         <?= $form->field($model, 'enable_comment')->checkbox(['value'=>1, 'label'=>Html::tag('span', 'Show Comment Box', ['class'=>'text'])]); ?>
                     </div>
 
-                    <div class="clearfix container-terms">
-                        <?= Html::tag('label', 'Categories', ['class'=>'control-label'])?>
-                        <div id="container-categories" style="max-height:150px;">
-                            <?= Html::checkboxList('Post[terms][category]', $selectedCategoryIDs, $categories,
-                                            ['item'=> function ($index, $label, $name, $isChecked, $value){
-                                                $checked = $isChecked ? 'checked' : '';
-                                                $chk = '<input type="checkbox" class="chk-terms" value="'.$value.'" name="'.$name.'" '.$checked.' />';
-                                                $html = Html::tag('div',
-                                                                    Html::tag('label', $chk . Html::tag('span', $label, ['class'=>'text']) )
-                                                                    ,
-                                                                    ['class'=>'checkbox']);
+                    <?php
+                    if(count($categories) >0 ){
+                        ?>
+                        <div class="clearfix container-terms">
+                            <?= Html::tag('label', 'Categories', ['class'=>'control-label'])?>
+                            <div id="container-categories" style="max-height:150px;">
+                                <?= Html::checkboxList('Post[terms][category]', $selectedCategoryIDs, $categories,
+                                                ['item'=> function ($index, $label, $name, $isChecked, $value){
+                                                    $checked = $isChecked ? 'checked' : '';
+                                                    $chk = '<input type="checkbox" class="chk-terms" value="'.$value.'" name="'.$name.'" '.$checked.' />';
+                                                    $html = Html::tag('div',
+                                                                        Html::tag('label', $chk . Html::tag('span', $label, ['class'=>'text']) )
+                                                                        ,
+                                                                        ['class'=>'checkbox']);
 
-                                                return $html;
-                                            }]) ?>
+                                                    return $html;
+                                                }]) ?>
+                            </div>
                         </div>
-                    </div>
+                        <?php
+                    }
+                    ?>
                     <div class="clearfix container-terms" id="container-tags">
                         <div class="form-group">
                             <?= Html::tag('label', 'Tags', ['class'=>'control-label']) ?>

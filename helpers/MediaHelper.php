@@ -17,7 +17,7 @@ class MediaHelper {
                 if(is_null(MediaHelper::$availabelSizes)){
                     $media = \admin\models\Media::getInstance();
 
-                    MediaHelper::$availabelSizes = \yii\helpers\ArrayHelper::toArray($media->loadImageSizes());
+                    MediaHelper::$availabelSizes = \yii\helpers\ArrayHelper::toArray($media->imageSizes);
                 }
 
                 if(array_key_exists($size, MediaHelper::$availabelSizes)){

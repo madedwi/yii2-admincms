@@ -129,4 +129,8 @@ class Terms extends \yii\db\ActiveRecord
         $deleteCommand = $connection->createCommand()->delete(self::tableName(), ['type'=>self::TYPE_CATEGORY, 'id'=>$idCategories]);
         return $deleteCommand->execute();
     }
+
+    public function getCategoryParent(){
+        return self::findCategory()->andWhere(['parent' => 0])->asArray()->all();
+    }
 }

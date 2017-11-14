@@ -24,15 +24,13 @@ class Administrator extends \yii\base\Module
     public function init()
     {
         Yii::setAlias('@adminUrl', Yii::getAlias('@web/administrator'));
-        // Yii::$app->setHomeUrl(Yii::getAlias('@adminUrl'));
-        // $this->setComponents();
         parent::init();
 
 
         $postSettings = array_merge([
             'post_have_category' => true,
             'post_have_tags' => true,
-        ], ArrayHelper::getValue(Yii::$app->params, 'post_settings'));
+        ], ArrayHelper::getValue(Yii::$app->params, 'post_settings', []));
 
         Yii::configure($this, [
             'components' => [
@@ -59,5 +57,25 @@ class Administrator extends \yii\base\Module
                 'post_settings' => $postSettings
             ]
         ]);
+        $adminOptions = array_merge([
+                'header_logo_image' => '',
+                'registeredAdminMenus' => ArrayHelper::getValue(Yii::$app->params, 'registeredAdminMenus', [])
+            ], $this->getWebOptions());
+        Yii::$app->params = array_merge(Yii::$app->params, $adminOptions);
+    }
+
+    private function getWebOptions(){
+        $query = new \yii\db\Query();
+        $q = clone $query;
+        $dependency = new \yii\caching\DbDependency([
+            'sql' => $q->select('option_value')->from('web_options')->where(['option_key'=>'lastModified'])->limit(1)->createCommand()->rawSql
+        ]);
+        return Yii::$app->cache->getOrSet('web_options', function()use($query){
+            $q = clone $query;
+            $_queryresult = $q->select('*')->from('web_options')->all();
+            return \yii\helpers\ArrayHelper::map($_queryresult, 'option_key', 'option_value');
+        }, null, $dependency);
+
+
     }
 }

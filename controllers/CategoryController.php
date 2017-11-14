@@ -81,8 +81,8 @@ class CategoryController extends Controller
     }
 
     private function form($model){
-        $parent = $model->find()->select(['id', 'terms'])->where(['parent'=>0])->asArray()->all();
-
+        // $parent = $model->find()->select(['id', 'terms'])->where(['parent'=>0])->asArray()->all();
+        $parent = $model->categoryParent;
         $parent = \yii\helpers\ArrayHelper::map($parent, 'id', 'terms');
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {

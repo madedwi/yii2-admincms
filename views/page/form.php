@@ -44,9 +44,14 @@ if($model->isNewRecord){
                             ])
                             ->widgetBody(['excludeCloseTag'=>true]);
                     ?>
-                        <?= $form->field($model, 'title')->textInput(['maxlength' => true]) ?>
+                        <?= $form->field($model, 'title')->textInput(['maxlength' => true, 'class'=>'form-control input-title slug-source', 'data'=>['slugspan'=>'.slugtext', 'createslug' => $model->isNewRecord ]]) ?>
 
-                        <?= $form->field($model, 'slug')->textInput(['maxlength' => true]) ?>
+                        <?= $this->render('@admin/views/layouts/slug-input', [
+                                'form' => $form,
+                                'model' => $model,
+                                'attribute' => 'slug',
+                                'slugformat' => "{[slug]}"
+                            ])?>
 
                         <?= $form->field($model, 'content')->textarea(['rows' => 6, 'id'=>'page_content']) ?>
 
@@ -156,7 +161,7 @@ if($model->isNewRecord){
 <?php
 \admin\assets\EditorAsset::register(Yii::$app->view);
 \admin\assets\MediaManagerAsset::register(Yii::$app->view);
-$script = <<<EDITORS
+$script = <<<JAVASCRIPT
 
 
 
@@ -181,7 +186,7 @@ $script = <<<EDITORS
         });
     })
 
-EDITORS;
+JAVASCRIPT;
 
 $this->registerJs($script);
 ?>

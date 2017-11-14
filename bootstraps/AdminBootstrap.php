@@ -1,5 +1,5 @@
 <?php
-namespace admin\components;
+namespace admin\bootstraps;
 
 use Yii;
 
@@ -16,23 +16,8 @@ class AdminBootstrap implements \yii\base\BootstrapInterface{
         ], TRUE);
 
 
-        Yii::$app->params = array_merge(Yii::$app->params, $this->getWebOptions());
+        
 
         // $app->params = array_merge($app->params, require_once(Yii::getAlias('@themes/basic/config.php')));
-    }
-
-    private function getWebOptions(){
-        $query = new \yii\db\Query();
-        $q = clone $query;
-        $dependency = new \yii\caching\DbDependency([
-            'sql' => $q->select('option_value')->from('web_options')->where(['option_key'=>'lastModified'])->limit(1)->createCommand()->rawSql
-        ]);
-        return Yii::$app->cache->getOrSet('web_options', function()use($query){
-            $q = clone $query;
-            $_queryresult = $q->select('*')->from('web_options')->all();
-            return \yii\helpers\ArrayHelper::map($_queryresult, 'option_key', 'option_value');
-        }, null, $dependency);
-
-
     }
 }

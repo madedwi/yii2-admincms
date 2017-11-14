@@ -42,7 +42,7 @@ class AdminBehavior extends \yii\base\Behavior{
                 }
 
                 Yii::setAlias('@adminUrl', Yii::getAlias('@web/administrator'));
-                $eventAction->action->controller->layout = '@app/modules/admin/views/layouts/main';
+                $eventAction->action->controller->layout = '@admin/views/layouts/main';
             }
         }
 

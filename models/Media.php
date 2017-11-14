@@ -84,7 +84,7 @@ class Media extends \yii\db\ActiveRecord
                 }
             }
 
-            $targetSize = $this->loadImageSizes();
+            $targetSize = $this->imageSizes;
             foreach ($targetSize as $key => $wh) {
                 if(!file_exists($uploadPath .  '/' . $key)){
                     \yii\helpers\FileHelper::createDirectory($uploadPath .  '/' . $key);
@@ -101,10 +101,8 @@ class Media extends \yii\db\ActiveRecord
     {
         if ($this->validate()) {
             $folderPath = Yii::getAlias('@webroot/' . $this->uploadPath);
-            // $targetSize = $this->loadImageSizes();
-            $targetSize = Yii::$app->getModule('administrator')->media->imageSizes;
+            $targetSize = $this->imageSizes;
             $imagine = Image::getImagine();
-
 
             foreach ($this->sourceFiles as $file) {
                 $baseName = \admin\helpers\String::slugify($file->baseName);
@@ -159,9 +157,32 @@ class Media extends \yii\db\ActiveRecord
         }
     }
 
-    public function loadImageSizes(){
-        $query = new Query();
-        $sizes = $query->select('option_value')->from('web_options')->where(['option_key'=>'image_sizes'])->one();
-        return json_decode($sizes['option_value']);
+    public function getImageSizes(){
+        return Yii::$app->getModule('administrator')->media->imageSizes;
+    }
+
+    public function deleteFileOrFolder($path){
+        $path  = str_replace('//', '/', $path);
+        if (!file_exists($path)) {
+            return true;
+        }
+
+        if (!is_dir($path)) {
+            return unlink($path);
+        }
+        $directoryContents = scandir($path);
+        arsort($directoryContents);
+        foreach ($directoryContents as $item) {
+            if ($item == '.' || $item == '..') {
+                continue;
+            }
+
+            if (!$this->deleteFileOrFolder($path . DIRECTORY_SEPARATOR . $item)) {
+                return false;
+            }
+
+        }
+
+        return rmdir($path);
     }
 }

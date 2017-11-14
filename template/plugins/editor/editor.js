@@ -68,20 +68,22 @@ String.prototype.slugify = function () {
     $(document).on('blur', '.slug-input', function(e){
         $(this).parent().find('.slug-click').html($(this).val());
         $(this).parent().find('.slug-click').removeClass('hidden');
-        console.log($(this).val());
         $(this).addClass('hidden');
         let slug = [];
         $('.slug-segment').each(function(i, elm){
             slug.push($(elm).html());
         });
-
         $('.full-input-slug').val(slug.join('/'));
     });
 
     $(document).on('change', '.slug-source', function(e){
-        let slug = this.value.slugify(),
-            targetSpan = $(this).data('slugspan');
-        $(targetSpan).find('.slug-click').html(slug);
-        $(targetSpan).find('input').val(slug);
+
+        if($(this).data('createslug')){
+            let slug = this.value.slugify(),
+                targetSpan = $(this).data('slugspan');
+            $(targetSpan).find('.slug-click').html(slug);
+            $(targetSpan).find('input').val(slug);
+            $(document).find('.slug-input').trigger('blur');
+        }
     });
 })(jQuery)

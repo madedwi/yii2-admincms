@@ -173,31 +173,33 @@ class Post extends \yii\db\ActiveRecord
         }
 
         foreach ($terms as $type=>$data) {
-            foreach ($data as $value) {
-                if($type == Terms::TYPE_CATEGORY){
-                    if(($key = array_search($value, $this->savedTerms[Terms::TYPE_CATEGORY])) === false){
-                        $command->insert('post_terms', [ 'post_id' => $this->id, 'terms_id' => $value, 'modified'=>$modified])->execute();
-                        unset($this->savedTerms[Terms::TYPE_CATEGORY][$key]);
-                    }else if(($key = array_search($value, $this->savedTerms[Terms::TYPE_CATEGORY])) !== false){
-                        unset($this->savedTerms[Terms::TYPE_CATEGORY][$key]);
-                    }
-                }else if($type == Terms::TYPE_TAG){
-                    if(($terms_id = array_search($value, $savedTag))!== FALSE){
-                        if(($key = array_search($value, $settedTag)) === false){
-                            $command->insert('post_terms', [ 'post_id' => $this->id, 'terms_id' => $terms_id, 'modified'=>$modified])->execute();
-                            unset($this->savedTerms[Terms::TYPE_TAG][$key]);
-                        }else if(($key = array_search($value, $settedTag)) !== false){
-                            unset($this->savedTerms[Terms::TYPE_TAG][$key]);
+            if(is_array($data) && count($data) > 0){
+                foreach ($data as $value) {
+                    if($type == Terms::TYPE_CATEGORY){
+                        if(($key = array_search($value, $this->savedTerms[Terms::TYPE_CATEGORY])) === false){
+                            $command->insert('post_terms', [ 'post_id' => $this->id, 'terms_id' => $value, 'modified'=>$modified])->execute();
+                            unset($this->savedTerms[Terms::TYPE_CATEGORY][$key]);
+                        }else if(($key = array_search($value, $this->savedTerms[Terms::TYPE_CATEGORY])) !== false){
+                            unset($this->savedTerms[Terms::TYPE_CATEGORY][$key]);
                         }
-                    }else if(!empty($value) && strlen($value)>0){
-                        $value = trim($value);
-                        $newTerms = new Terms();
-                        $newTerms->scenario   = Terms::SCENARIO_TAGS;
-                        $newTerms->terms      = $value;
-                        $newTerms->terms_slug = \admin\helpers\String::slugify($value);
-                        $newTerms->type       = Terms::TYPE_TAG;
-                        $newTerms->save();
-                        $command->insert('post_terms', [ 'post_id' => $this->id, 'terms_id' => $newTerms->id, 'modified'=>$modified])->execute();
+                    }else if($type == Terms::TYPE_TAG){
+                        if(($terms_id = array_search($value, $savedTag))!== FALSE){
+                            if(($key = array_search($value, $settedTag)) === false){
+                                $command->insert('post_terms', [ 'post_id' => $this->id, 'terms_id' => $terms_id, 'modified'=>$modified])->execute();
+                                unset($this->savedTerms[Terms::TYPE_TAG][$key]);
+                            }else if(($key = array_search($value, $settedTag)) !== false){
+                                unset($this->savedTerms[Terms::TYPE_TAG][$key]);
+                            }
+                        }else if(!empty($value) && strlen($value)>0){
+                            $value = trim($value);
+                            $newTerms = new Terms();
+                            $newTerms->scenario   = Terms::SCENARIO_TAGS;
+                            $newTerms->terms      = $value;
+                            $newTerms->terms_slug = \admin\helpers\String::slugify($value);
+                            $newTerms->type       = Terms::TYPE_TAG;
+                            $newTerms->save();
+                            $command->insert('post_terms', [ 'post_id' => $this->id, 'terms_id' => $newTerms->id, 'modified'=>$modified])->execute();
+                        }
                     }
                 }
             }
@@ -205,12 +207,14 @@ class Post extends \yii\db\ActiveRecord
 
         // remove saved terms;
         foreach ($this->savedTerms as $type => $data) {
-            foreach ($data as $value) {
-                if($type == Terms::TYPE_CATEGORY){
-                    $command->delete('post_terms', ['post_id'=>$this->id, 'terms_id'=>$value])->execute();
-                }else if($type == Terms::TYPE_TAG){
-                    if(($terms_id = array_search($value, $savedTag))!== FALSE){
-                        $command->delete('post_terms', ['post_id'=>$this->id, 'terms_id'=>$terms_id])->execute();
+            if(is_array($data) && count($data) > 0){
+                foreach ($data as $value) {
+                    if($type == Terms::TYPE_CATEGORY){
+                        $command->delete('post_terms', ['post_id'=>$this->id, 'terms_id'=>$value])->execute();
+                    }else if($type == Terms::TYPE_TAG){
+                        if(($terms_id = array_search($value, $savedTag))!== FALSE){
+                            $command->delete('post_terms', ['post_id'=>$this->id, 'terms_id'=>$terms_id])->execute();
+                        }
                     }
                 }
             }
