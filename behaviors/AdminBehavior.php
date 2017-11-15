@@ -1,7 +1,7 @@
 <?php
 namespace admin\behaviors;
 
-use Yii;
+use Yii; 
 use yii\base\Controller;
 
 class AdminBehavior extends \yii\base\Behavior{

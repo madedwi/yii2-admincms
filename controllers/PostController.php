@@ -17,6 +17,14 @@ use yii\filters\AccessControl;
  */
 class PostController extends Controller
 {
+
+    private static $adminModule;
+
+    public function beforeAction($action){
+        self::$adminModule = Yii::$app->controller->module;
+
+        return parent::beforeAction($action);
+    }
     /**
      * @inheritdoc
      */

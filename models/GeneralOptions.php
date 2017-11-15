@@ -121,6 +121,10 @@ class GeneralOptions extends Options{
             $this->insertOptions('gplus', $this->gplus);
             $this->insertOptions('pinterest', $this->pinterest);
 
+
+            $this->generatePostUrlRoute();
+
+
             foreach ($this->custom_metas as $key => $value) {
                 $this->insertOptions($key, $value);
             }
@@ -129,6 +133,31 @@ class GeneralOptions extends Options{
         }
 
         return false;
+    }
+
+    public function generatePostUrlRoute(){
+        // load route json file;
+        $routeExp = strtr($this->post_url_format, [
+            '{[' => '<',
+            ']}' => '>',
+            'publish_year' => 'year:\d+',
+            'publish_month_numeric' => 'month:\d+',
+            'publish_month_name' => 'monthname:\w+',
+            'category' => 'terms:[\w\-]+',
+        ]);
+
+        $routeArray = [
+            '' => 'administrator/client/index',
+            $routeExp => 'administrator/client/post',
+            '<slug:[\w\-]+>' => 'administrator/client/page',
+            'archives/<category:[\w\-]+>' => 'administrator/client/archives',
+            'archives/<year:\d+>/<month:\d+>' => 'administrator/client/archives',
+            'archives/<year:\d+>' => 'administrator/client/archives'
+        ];
+
+        $fp = fopen(Yii::getAlias('@runtime/router.json'), 'w');
+        fwrite($fp, json_encode($routeArray));
+        fclose($fp);
     }
 
     public function loadClientOptions($options = []){
@@ -140,7 +169,7 @@ class GeneralOptions extends Options{
                     if($value['format'] == 'group_input'){
                         foreach ($value['inputs'] as $key => $value) {
                             $optionKey[] = $key;
-                            $this->custom_metas[$key] = "";    
+                            $this->custom_metas[$key] = "";
                         }
                     }else{
                         $optionKey[] = $key;
@@ -155,6 +184,5 @@ class GeneralOptions extends Options{
         $opts = \yii\helpers\ArrayHelper::map($_opt, 'option_key', 'option_value');
         $this->custom_metas = array_merge($this->custom_metas, $opts);
     }
-
 
 }

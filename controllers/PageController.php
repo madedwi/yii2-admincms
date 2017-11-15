@@ -176,4 +176,8 @@ class PageController extends Controller
 
         return $categories;
     }
+
+    public function actionClient(){
+        
+    }
 }
