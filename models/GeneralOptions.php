@@ -35,15 +35,6 @@ class GeneralOptions extends Options{
             }
         }
 
-        // if(isset(static::$otherCustomMetas) && !empty(static::$otherCustomMetas)){
-        //     foreach (static::$otherCustomMetas as $metaGroup) {
-        //         $input_meta = isset($metaGroup['meta_input']) ? $metaGroup['meta_input'] : [];
-        //         foreach ($input_meta as $key => $value) {
-        //             $this->custom_metas[$key] = "";
-        //         }
-        //     }
-        // }
-
         $cacheDepedency = new \yii\caching\DbDependency(['sql'=>"SELECT option_key, option_value FROM ".self::tableName()." WHERE option_key='lastModified' LIMIT 1;"]);
         $this->loadedOptions  = [
             'web_title', 'web_tagline', 'favicon', 'web_meta_description', 'web_meta_keyword', 'timezone', 'time_format',
@@ -55,8 +46,6 @@ class GeneralOptions extends Options{
             return parent::find()->where(['option_key'=>$loadedOptions])->asArray()->all();
         }, (3600*24*7), $cacheDepedency);
 
-
-
         foreach ($options as $option) {
             if(array_key_exists($option['option_key'], $this->custom_metas)){
                 $this->custom_metas[$option['option_key']] = $option['option_value'];
@@ -67,14 +56,6 @@ class GeneralOptions extends Options{
         }
 
         parent::init();
-    }
-
-    public static function getNewInstance($options = []){
-        // static::$otherCustomMetas = $options;
-        $generalOptions = new GeneralOptions();
-        $generalOptions->loadClientOptions($options);
-
-        return $generalOptions;
     }
 
     public function rules(){
@@ -146,13 +127,15 @@ class GeneralOptions extends Options{
             'category' => 'terms:[\w\-]+',
         ]);
 
+        $defaultController = Yii::$app->controller->module->defaultClientRoute;
+        $defaultController = str_replace('controller', '', strtolower($defaultController));
         $routeArray = [
-            '' => 'administrator/client/index',
-            $routeExp => 'administrator/client/post',
-            '<slug:[\w\-]+>' => 'administrator/client/page',
-            'archives/<category:[\w\-]+>' => 'administrator/client/archives',
-            'archives/<year:\d+>/<month:\d+>' => 'administrator/client/archives',
-            'archives/<year:\d+>' => 'administrator/client/archives'
+            '' =>  $defaultController. '/index',
+            "{$routeExp}" => $defaultController . '/post',
+            '<slug:[\w\-]+>' => $defaultController . '/page',
+            'archives/<category:[\w\-]+>' => $defaultController . '/archives',
+            'archives/<year:\d+>/<month:\d+>' => $defaultController . '/archives',
+            'archives/<year:\d+>' => $defaultController . '/archives'
         ];
 
         $fp = fopen(Yii::getAlias('@runtime/router.json'), 'w');
@@ -183,6 +166,10 @@ class GeneralOptions extends Options{
         $_opt = self::find()->where(['option_key'=>$optionKey])->asArray()->all();
         $opts = \yii\helpers\ArrayHelper::map($_opt, 'option_key', 'option_value');
         $this->custom_metas = array_merge($this->custom_metas, $opts);
+    }
+
+    public function getLoadedOptions(){
+        return $this->loadedOptions;
     }
 
 }

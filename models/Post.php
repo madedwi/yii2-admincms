@@ -25,7 +25,7 @@ use admin\behaviors\PostBehavior;
  *
  * @property User $postby0
  */
-class Post extends \yii\db\ActiveRecord
+class Post extends \admin\db\WimaraAR
 {
 
     public $parent, $seo_keyword, $seo_description, $seo_title, $header_img, $enable_comment;

@@ -8,10 +8,12 @@ use yii\helpers\ArrayHelper;
  * administrator module definition class
  */
 class Administrator extends \yii\base\Module
-{ 
+{
     /**
      * @inheritdoc
      */
+
+
     public $controllerNamespace = 'admin\controllers';
     public $viewPath    = '@admin/views';
     public $layoutPath  = '@admin/views/layouts';
@@ -19,11 +21,12 @@ class Administrator extends \yii\base\Module
     public $defaultRoute = 'dashboard';
 
 
+    public $defaultClientRoute = 'administrator/client';
     public $clientBehaviors = '';
     public $publicLayout = '';
-    public $pageView    = '';
-    public $postView    = '';
-    public $archiveView = '';
+    public $pageView    = 'page';
+    public $postView    = 'post';
+    public $archiveView = 'archive';
 
 
     /**

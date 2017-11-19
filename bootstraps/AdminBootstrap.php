@@ -2,11 +2,13 @@
 namespace admin\bootstraps;
 
 use Yii;
+use admin\models\GeneralOptions;
 
 class AdminBootstrap implements \yii\base\BootstrapInterface{
     public function bootstrap($app){
         $rules = [
             //-------------------------------------------------------------------------------------------------------------------------------
+            '<module:administrator>' => '<module>/dashboard/index',
             '<module:administrator>/login' => '<module>/dashboard/login',
             '<module:administrator>/logout' => '<module>/dashboard/logout',
 
@@ -18,10 +20,18 @@ class AdminBootstrap implements \yii\base\BootstrapInterface{
         if(file_exists(Yii::getAlias('@runtime/router.json'))){
             $jsonString = file_get_contents(Yii::getAlias('@runtime/router.json'));
             $routerArray = json_decode($jsonString, true);
-            $rules = array_merge($rules, $routerArray);
+            // $rules = array_merge($rules, $routerArray);
+            foreach ($routerArray as $key => $value) {
+                $rules[$key] = $value;
+            }
         }
 
         $app->getUrlManager()->addRules($rules, TRUE);
         // $app->params = array_merge($app->params, require_once(Yii::getAlias('@themes/basic/config.php')));
+
+        $genOptions = new GeneralOptions();
+        foreach ($genOptions->loadedOptions as $opt) {
+            $app->params[$opt] = $genOptions->$opt;
+        }
     }
 }

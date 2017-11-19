@@ -16,8 +16,16 @@ class ClientController extends \yii\web\Controller
 
     public function actionIndex()
     {
-        
         return $this->render('index');
+    }
+
+    public function actionPage(){
+
+        return $this->render(self::$adminModule->pageView);
+    }
+
+    public function actionPost(){
+        return $this->render(self::$adminModule->postView);
     }
 
 }

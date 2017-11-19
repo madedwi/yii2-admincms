@@ -10,6 +10,10 @@ class WimaraAR extends \yii\db\ActiveRecord{
     public function __construct(){
         parent::__construct();
 
+        foreach ($this->customAttributes() as $key => $label) {
+            $this->setCustomAttribute($key, null);
+        }
+
         parent::init();
     }
 

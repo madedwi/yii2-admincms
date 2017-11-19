@@ -22,15 +22,15 @@ use admin\behaviors\PostBehavior;
  *
  * @property User $postby0
  */
-class Page extends \yii\db\ActiveRecord
+class Page extends \admin\db\WimaraAR
 {
 
-    public $seo_title, $seo_keyword, $seo_description, $header_img;
+    // public $seo_title, $seo_keyword, $seo_description, $header_img;
     public $bulk_id, $bulk_action;
     public $custom_metas;
 
     public function init(){
-        parent::init();
+
         $this->custom_metas = [];
         if(isset(Yii::$app->params['page_metas'])){
             foreach (Yii::$app->params['page_metas'] as $metaGroup) {
@@ -40,6 +40,13 @@ class Page extends \yii\db\ActiveRecord
                 }
             }
         }
+        parent::init();
+    }
+
+    public function customAttributes(){
+        return [
+            'seo_title', 'seo_keyword', 'seo_description', 'header_img'
+        ];
     }
 
     public function behaviors(){
