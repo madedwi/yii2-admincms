@@ -10,8 +10,8 @@ class WimaraAR extends \yii\db\ActiveRecord{
     public function __construct(){
         parent::__construct();
 
-        foreach ($this->customAttributes() as $key => $label) {
-            $this->setCustomAttribute($key, null);
+        foreach ($this->customAttributes() as $attributes) {
+            $this->setCustomAttribute($attributes, null);
         }
 
         parent::init();
@@ -54,12 +54,20 @@ class WimaraAR extends \yii\db\ActiveRecord{
         return [];
     }
 
-    public function hasCustomAttribtue($name){
+    public function customAttributeLabels(){
+        return [];
+    }
+
+    public function hasCustomAttribute($name){
         return isset($this->_custom_attributes[$name]) || in_array($name, $this->customAttributes(), true);
     }
 
     public function setCustomAttribute($name, $value){
         $this->_custom_attributes[$name] = $value;
+    }
+
+    public function attributeLabels(){
+        return $this->customAttributeLabels();
     }
 
 

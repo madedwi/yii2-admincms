@@ -73,9 +73,8 @@ if($model->isNewRecord){
                     <?php $template->widgetEnd(); ?>
                 </div>
                 <?php
-                if(isset(Yii::$app->params['page_metas'])){
-                    $custom_metas = Yii::$app->params['page_metas'];
-                    // print_r($custom_metas);
+                if(array_key_exists('page_custom_meta', Yii::$app->params)){
+                    $custom_metas = Yii::$app->params['page_custom_meta'];
                     foreach ($custom_metas as $metaGroup) {
                         $groupLabel = isset($metaGroup['meta_group_label']) ? $metaGroup['meta_group_label'] : '';
                         $inputs     = isset($metaGroup['meta_input']) ? $metaGroup['meta_input'] : [];

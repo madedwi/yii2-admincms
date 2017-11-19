@@ -2,47 +2,51 @@
 namespace admin\behaviors;
 
 use Yii;
-use yii\db\ActiveRecord;
+use admin\db\WimaraAR;
 use yii\db\Query;
+use yii\helpers\ArrayHelper;
 
 class PostBehavior extends \yii\base\Behavior{
 
     public $attachedClass;
     public $defaultMetas;
-    public $haveCustomMeta;
-    private $customMetas;
+    public $metaFromClient;
+    public $customMetas;
+    private $customMetasRules;
+    private $haveCustomMeta;
     private $query;
-
 
     public function events(){
         return [
-            ActiveRecord::EVENT_AFTER_INSERT => 'afterInsertPost',
-            ActiveRecord::EVENT_AFTER_UPDATE => 'afterUpdatetPost',
-            ActiveRecord::EVENT_AFTER_FIND => 'afterFindPost',
-            ActiveRecord::EVENT_INIT => 'initPost'
+            WimaraAR::EVENT_AFTER_INSERT => 'afterInsertPost',
+            WimaraAR::EVENT_AFTER_UPDATE => 'afterUpdatetPost',
+            WimaraAR::EVENT_AFTER_FIND => 'afterFindPost',
+            WimaraAR::EVENT_INIT => 'initPost'
         ];
     }
 
     public function initPost(){
-        $this->attachedClass->custom_metas = [];
+        if (!is_subclass_of($this->attachedClass, WimaraAR::className())) {
+            throw new \yii\base\InvalidCallException("PostBehavior should only be attached to administrator\db\WimaraAR child class.");
+        }
+        $this->customMetasRules = [];
         $this->customMetas = [];
-        if(isset(Yii::$app->params['post_metas'])){
-            foreach (Yii::$app->params['post_metas'] as $metaGroup) {
+
+        if(array_key_exists($this->metaFromClient, Yii::$app->params)){
+            foreach (Yii::$app->params[$this->metaFromClient] as $metaGroup) {
                 foreach ($metaGroup['meta_input'] as $key => $value) {
-                    $this->attachedClass->custom_metas[$key] = '';
+                    $this->attachedClass->setCustomAttribute($key, ArrayHelper::getValue($value, 'default', ''));
                     $this->customMetas[$key] = $value;
+                    array_push($this->customMetasRules, ArrayHelper::getValue($value, 'rules', [$key, 'safe']));
                 }
             }
         }
 
-        if(isset(Yii::$app->params['page_metas'])){
-            foreach (Yii::$app->params['page_metas'] as $metaGroup) {
-                foreach ($metaGroup['meta_input'] as $key => $value) {
-                    $this->attachedClass->custom_metas[$key] = '';
-                    $this->customMetas[$key] = $value;
-                }
-            }
-        }
+        $this->haveCustomMeta = count($this->customMetas) > 0;
+    }
+
+    public function getCustomMetasRules(){
+        return $this->customMetasRules;
     }
 
     public function afterInsertPost(){
@@ -61,13 +65,12 @@ class PostBehavior extends \yii\base\Behavior{
         if($this->haveCustomMeta){
             $dataMultipleMedia = Yii::$app->request->post('multiple_media');
             foreach ($this->customMetas as $meta => $value) {
-                if(array_key_exists($meta, $this->attachedClass->custom_metas)){
-                    $this->insertMeta($meta, $this->attachedClass->custom_metas[$meta]);
+                if($this->attachedClass->hasCustomAttribute($meta)){
+                    $this->insertMeta($meta, $this->attachedClass->$meta);
                 }else if($value['format'] == 'multiple_media' && !empty($dataMultipleMedia)){
                     $dataMultipleMedia = json_encode($dataMultipleMedia);
                     $this->insertMeta($meta, $dataMultipleMedia);
                 }
-
             }
         }
     }
@@ -95,11 +98,7 @@ class PostBehavior extends \yii\base\Behavior{
 
             if(!empty($metas) && !is_null($metas)){
                 foreach($metas as $meta){
-                    if(in_array($meta['metakey'], $this->defaultMetas)){
-                        $attachedClass->$meta['metakey'] = $meta['value'];
-                    }else{
-                        $attachedClass->custom_metas[$meta['metakey']] = $meta['value'];
-                    }
+                    $attachedClass->$meta['metakey'] = $meta['value'];
                 }
             }
         }

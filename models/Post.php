@@ -351,7 +351,7 @@ class Post extends \admin\db\WimaraAR
     }
 
     public static function publishedPostQuery(){
-        return self::find()->andWhere(['post.status'=>self::PUBLISHED]);
+        return self::find()->andWhere(['post.status'=>self::PUBLISHED])->orderBy(['post.publishdate' =>SORT_DESC]);
     }
 
     public function getPostByTerms($type, $slug){

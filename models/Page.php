@@ -24,29 +24,10 @@ use admin\behaviors\PostBehavior;
  */
 class Page extends \admin\db\WimaraAR
 {
-
-    // public $seo_title, $seo_keyword, $seo_description, $header_img;
     public $bulk_id, $bulk_action;
-    public $custom_metas;
-
-    public function init(){
-
-        $this->custom_metas = [];
-        if(isset(Yii::$app->params['page_metas'])){
-            foreach (Yii::$app->params['page_metas'] as $metaGroup) {
-                $input_meta = isset($metaGroup['meta_input']) ? $metaGroup['meta_input'] : [];
-                foreach ($input_meta as $key => $value) {
-                    $this->custom_metas[$key] = "";
-                }
-            }
-        }
-        parent::init();
-    }
 
     public function customAttributes(){
-        return [
-            'seo_title', 'seo_keyword', 'seo_description', 'header_img'
-        ];
+        return ['seo_title', 'seo_keyword', 'seo_description', 'header_img'];
     }
 
     public function behaviors(){
@@ -54,8 +35,8 @@ class Page extends \admin\db\WimaraAR
             'postBehavior' => [
                 'class'         => PostBehavior::className(),
                 'attachedClass' => $this,
-                'defaultMetas'  => ['seo_keyword', 'seo_description', 'seo_title', 'header_img'],
-                'haveCustomMeta' => true,
+                'defaultMetas'  => $this->customAttributes(),
+                'metaFromClient' => 'page_custom_meta',
             ]
         ];
     }
@@ -72,7 +53,9 @@ class Page extends \admin\db\WimaraAR
      */
     public function rules()
     {
-        return [
+        $behaviorRules = $this->getBehavior('postBehavior')->getCustomMetasRules();
+
+        $defRules = [
             [['postby', 'parent', 'postsort'], 'integer'],
             [['content', 'seo_description', 'slug'], 'string'],
             [['postdate', 'modified'], 'safe'],
@@ -86,6 +69,12 @@ class Page extends \admin\db\WimaraAR
             [['title', 'content'], 'required'],
             ['custom_metas' , 'safe']
         ];
+
+        foreach ($behaviorRules as $rules) {
+            $defRules[] = $rules;
+        }
+
+        return $defRules;
     }
 
     /**
@@ -93,19 +82,22 @@ class Page extends \admin\db\WimaraAR
      */
     public function attributeLabels()
     {
-        return [
-            'id' => 'ID',
-            'title' => 'Nama Halaman',
-            'content' => 'Konten',
-            'type' => 'Type',
-            'status' => 'Status',
-            'layout' => 'Layout',
-            'slug' => 'Slug',
-            'postdate' => 'Postdate',
-            'postby' => 'Postby',
-            'modified' => 'modified',
-            'user.email' => 'author'
-        ];
+        $parentAttribute = parent::attributeLabels();
+        return array_merge(
+                            $parentAttribute,
+                            [
+                                'id' => 'ID',
+                                'title' => 'Nama Halaman',
+                                'content' => 'Konten',
+                                'type' => 'Type',
+                                'status' => 'Status',
+                                'layout' => 'Layout',
+                                'slug' => 'Slug',
+                                'postdate' => 'Postdate',
+                                'postby' => 'Postby',
+                                'modified' => 'modified',
+                                'user.email' => 'author'
+                            ]);
     }
 
     public static function find()

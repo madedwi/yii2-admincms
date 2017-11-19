@@ -48,7 +48,7 @@ JAVASCRIPT;
 }
 
 foreach ($inputs as $meta_key=>$input) {
-    $tagValue = isset($model->custom_metas[$meta_key]) ? $model->custom_metas[$meta_key] : '';
+    $tagValue = isset($model->$meta_key) ? $model->$meta_key : '';
     $options = isset($input['options']) ? $input['options'] : [];
     $hint = array_key_exists('hint', $options) ? $options['hint'] : "";
     unset($options['hint']);
@@ -65,26 +65,26 @@ foreach ($inputs as $meta_key=>$input) {
         \admin\assets\EditorAsset::register(Yii::$app->view);
         $options = array_merge(['value'=>$tagValue, 'rows'=>3, 'class'=>'form-control'], $options);
         $options['class'] .= ' custom-meta_summernote ';
-        echo $form->field($model, 'custom_metas['.$meta_key.']')->textarea($options)->label($input['label'])->hint($hint);
+        echo $form->field($model, $meta_key)->textarea($options)->label($input['label'])->hint($hint);
         $this->registerJs("$('.custom-meta_summernote').summernote({height:300})", \yii\web\View::POS_READY, 'summernote-custom-meta');
     }else if($input['format'] == 'shorttext'){
         $options = array_merge(['value'=>$tagValue, 'maxlength'=>200], $options);
-        echo $form->field($model, 'custom_metas['.$meta_key.']')->textInput($options)->label($input['label'])->hint($hint);
+        echo $form->field($model, $meta_key)->textInput($options)->label($input['label'])->hint($hint);
     }else if($input['format'] == 'select'){
         $options = array_merge(['value'=>$tagValue], $options);
-        echo $form->field($model, 'custom_metas['.$meta_key.']')->dropDownList($input['values'], $options)->label($input['label'])->hint($hint);
+        echo $form->field($model, $meta_key)->dropDownList($input['values'], $options)->label($input['label'])->hint($hint);
     }else if($input['format'] == 'checkbox'){
         $checked = false;
         if(($tagValue==$input['value'])){
             $checked = true;
         }
         $options = array_merge(['value'=>$input['value'],'checked'=> $checked, 'label'=>Html::tag('span', $input['label'], ['class'=>'text'])], $options);
-        echo $form->field($model, 'custom_metas['.$meta_key.']')->checkbox($options)->hint($hint);
+        echo $form->field($model, $meta_key)->checkbox($options)->hint($hint);
     }else if($input['format'] == 'datepicker'){
         $options = array_merge(['value'=>$tagValue, 'class'=>'form-control', 'data-targetinput'=>'#date_'.$meta_key], $options);
         $options['class'] .= " bs-selectdate";
-        echo  $form->field($model, 'custom_metas['.$meta_key.']')->textInput($options)->label($input['label'])->hint($hint);
-        echo Html::activeHiddenInput($model, 'custom_metas['.$meta_key.']', ['id'=>'date_'.$meta_key]);
+        echo  $form->field($model, $meta_key)->textInput($options)->label($input['label'])->hint($hint);
+        echo Html::activeHiddenInput($model, $meta_key, ['id'=>'date_'.$meta_key]);
     }else if($input['format'] == 'media'){
         $filename = $model->custom_metas[$meta_key];
         // $filename = $savedData['filename'];
@@ -93,7 +93,7 @@ foreach ($inputs as $meta_key=>$input) {
         <div class="form-group mm-container" data-single-image="true">
 
             <div class="clearfix">
-                <?= Html::activeHiddenInput($model, 'custom_metas['.$meta_key.']',['class'=>'multiple_media-filename'])?>
+                <?= Html::activeHiddenInput($model, $meta_key,['class'=>'multiple_media-filename'])?>
                 <button type="button" class="btn btn-default btn-add-multiple_media">Add <?= $input['label'] ?></button>
                 <p></p>
             </div>
