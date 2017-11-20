@@ -12,6 +12,8 @@ use admin\models\Page;
  */
 class PageSearch extends Page
 {
+
+    public $meta, $terms;
     /**
      * @inheritdoc
      */
@@ -20,6 +22,7 @@ class PageSearch extends Page
         return [
             [['id', 'postby'], 'integer'],
             [['title', 'content', 'type', 'status', 'layout', 'postdate', 'modified'], 'safe'],
+            [['meta', 'terms'], 'safe']
         ];
     }
 
@@ -70,6 +73,52 @@ class PageSearch extends Page
             ->andFilterWhere(['like', 'status', $this->status])
             ->andFilterWhere(['like', 'layout', $this->layout])
             ->andFilterWhere(['like', 'modifed', $this->modified]);
+
+        return $dataProvider;
+    }
+
+    public function clientSearch($params, $pageSize=false){
+        $query = Page::findPublishedPage()->joinWith(['user']);
+
+        $pagination = [
+            'pageSize' => $pageSize,
+        ];
+
+        $dataProvider = new ActiveDataProvider([
+            'query' => $query,
+            'sort'=> ['defaultOrder' => ['postsort'=>SORT_ASC]],
+            'pagination' => !$pageSize ? false : $pagination ,
+        ]);
+
+        $this->load($params);
+
+        if (!$this->validate()) {
+            // uncomment the following line if you do not want to return any records when validation fails
+            // $query->where('0=1');
+            return $dataProvider;
+        }
+        $query->andFilterWhere(['like', 'title', $this->title])
+            ->andFilterWhere(['like', 'content', $this->content]);
+
+        if(!is_null($this->meta)){
+            $qmeta = $this->query->select('post_id')->from('post_meta')->groupBy('post_id');
+            foreach ($this->meta as $key => $value) {
+                $qmeta->orWhere(['AND', ['=', 'metakey', $key], ['=', 'value', $value]]);
+            }
+            $qmeta = $qmeta->createCommand()->rawSql;
+            $whereMeta = " post.id IN ({$qmeta}) ";
+            $query->andWhere($whereMeta);
+        }
+
+        if(!is_null($this->terms)){
+            foreach ($this->terms as $key => $value) {
+                $qterms = $this->query->select('post_id')->from('post_terms')->innerJoin('terms', 'post_terms.terms_id=terms.id')->groupBy('post_id');
+                $qterms->andWhere(['terms.type'=>$key, 'terms.terms_slug'=>$value]);
+                $qterms = $qterms->createCommand()->rawSql;
+                $whereTerms = " post.id IN ({$qterms}) ";
+                $query->andWhere($whereTerms);
+            }
+        }
 
         return $dataProvider;
     }

@@ -70,9 +70,9 @@ foreach ($inputs as $meta_key=>$input) {
     }else if($input['format'] == 'shorttext'){
         $options = array_merge(['value'=>$tagValue, 'maxlength'=>200], $options);
         echo $form->field($model, $meta_key)->textInput($options)->label($input['label'])->hint($hint);
-    }else if($input['format'] == 'select'){
+    }else if($input['format'] == 'dropDownList'){
         $options = array_merge(['value'=>$tagValue], $options);
-        echo $form->field($model, $meta_key)->dropDownList($input['values'], $options)->label($input['label'])->hint($hint);
+        echo $form->field($model, $meta_key)->dropDownList($input['options'], $options)->label($input['label'])->hint($hint);
     }else if($input['format'] == 'checkbox'){
         $checked = false;
         if(($tagValue==$input['value'])){

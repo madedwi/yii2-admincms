@@ -64,6 +64,8 @@ use yii\helpers\Html;
                     $slugText = 'slug-text';
                 }else if(isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment])){
                     $slugText = $slugSegment[$currentSegment];
+                }else if(!empty($model->slug)){
+                    $slugText = $model->slug;
                 }else{
                     $slugText = \admin\helpers\String::slugify($model->title);
                 }

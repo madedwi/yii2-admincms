@@ -178,6 +178,6 @@ class PageController extends Controller
     }
 
     public function actionClient(){
-        
+
     }
 }

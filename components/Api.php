@@ -7,8 +7,6 @@ use yii\data\ActiveDataProvider;
 
 class Api extends Component {
 
-    protected function returnAsDataProvider($query){
-        
-    }
+    public static $instance = NULL;
 
 }

@@ -58,6 +58,10 @@ class WimaraAR extends \yii\db\ActiveRecord{
         return [];
     }
 
+    public function attributeLabels(){
+        return $this->customAttributeLabels();
+    }
+
     public function hasCustomAttribute($name){
         return isset($this->_custom_attributes[$name]) || in_array($name, $this->customAttributes(), true);
     }
@@ -66,9 +70,15 @@ class WimaraAR extends \yii\db\ActiveRecord{
         $this->_custom_attributes[$name] = $value;
     }
 
-    public function attributeLabels(){
-        return $this->customAttributeLabels();
+    public function getCustomAttribute($name){
+        return $this->_custom_attributes[$name];
     }
+
+    public function getCustomAttributes(){
+        return $this->_custom_attributes;
+    }
+
+
 
 
 

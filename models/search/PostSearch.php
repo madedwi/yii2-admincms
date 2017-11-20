@@ -109,12 +109,14 @@ class PostSearch extends Post
 
         $query = Post::publishedPostQuery()->select("post.*")->joinWith(['author', 'postTerms']);
 
+        $pagination = [
+            'pageSize' => $pageSize,
+        ];
+
         $dataProvider = new ActiveDataProvider([
             'query' => $query,
             'sort'=> ['defaultOrder' => ['publishdate'=>SORT_DESC]],
-            'pagination' => [
-                'pageSize' => $pageSize,
-            ],
+            'pagination' => !$pageSize ? false : $pagination ,
         ]);
 
         $this->load($params);
@@ -135,7 +137,7 @@ class PostSearch extends Post
         if(!empty($this->meta)){
             $qmeta = $this->query->select('post_id')->from('post_meta')->groupBy('post_id');
             foreach ($this->meta as $key => $value) {
-                $qmeta->andWhere(['metakey'=>$key, 'value'=>$value]);
+                $qmeta->orWhere(['AND', ['=', 'metakey', $key], ['=', 'value',$value]]);
             }
             $qmeta = $qmeta->createCommand()->rawSql;
             $whereMeta = " post.id IN ({$qmeta}) ";

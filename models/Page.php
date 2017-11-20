@@ -26,20 +26,6 @@ class Page extends \admin\db\WimaraAR
 {
     public $bulk_id, $bulk_action;
 
-    public function customAttributes(){
-        return ['seo_title', 'seo_keyword', 'seo_description', 'header_img'];
-    }
-
-    public function behaviors(){
-        return [
-            'postBehavior' => [
-                'class'         => PostBehavior::className(),
-                'attachedClass' => $this,
-                'defaultMetas'  => $this->customAttributes(),
-                'metaFromClient' => 'page_custom_meta',
-            ]
-        ];
-    }
     /**
      * @inheritdoc
      */
@@ -53,7 +39,6 @@ class Page extends \admin\db\WimaraAR
      */
     public function rules()
     {
-        $behaviorRules = $this->getBehavior('postBehavior')->getCustomMetasRules();
 
         $defRules = [
             [['postby', 'parent', 'postsort'], 'integer'],
@@ -70,11 +55,7 @@ class Page extends \admin\db\WimaraAR
             ['custom_metas' , 'safe']
         ];
 
-        foreach ($behaviorRules as $rules) {
-            $defRules[] = $rules;
-        }
-
-        return $defRules;
+        return $this->getBehavior('postBehavior')->rules($defRules);
     }
 
     /**
@@ -82,22 +63,36 @@ class Page extends \admin\db\WimaraAR
      */
     public function attributeLabels()
     {
-        $parentAttribute = parent::attributeLabels();
-        return array_merge(
-                            $parentAttribute,
-                            [
-                                'id' => 'ID',
-                                'title' => 'Nama Halaman',
-                                'content' => 'Konten',
-                                'type' => 'Type',
-                                'status' => 'Status',
-                                'layout' => 'Layout',
-                                'slug' => 'Slug',
-                                'postdate' => 'Postdate',
-                                'postby' => 'Postby',
-                                'modified' => 'modified',
-                                'user.email' => 'author'
-                            ]);
+        return [
+                    'id' => 'ID',
+                    'title' => 'Nama Halaman',
+                    'content' => 'Konten',
+                    'type' => 'Type',
+                    'status' => 'Status',
+                    'layout' => 'Layout',
+                    'slug' => 'Slug',
+                    'postdate' => 'Postdate',
+                    'postby' => 'Postby',
+                    'modified' => 'modified',
+                    'user.email' => 'author',
+                    'seo_title' => 'Title Alias',
+                    'seo_keyword' => 'Keyword',
+                    'description' => 'Content Description'
+                ];
+    }
+
+    public function customAttributes(){
+        return ['seo_title', 'seo_keyword', 'seo_description', 'header_img'];
+    }
+
+    public function behaviors(){
+        return [
+            'postBehavior' => [
+                'class' => PostBehavior::className(),
+                'metaFromClient' => 'page_custom_meta',
+                'contentType' => 'page',
+            ]
+        ];
     }
 
     public static function find()
@@ -108,25 +103,8 @@ class Page extends \admin\db\WimaraAR
 
     public function beforeValidate(){
         $this->postby   = Yii::$app->user->identity->id;
+        $this->parent   = !is_null($this->parent) ? $this->parent : '0';
         return parent::beforeValidate();
-    }
-
-    public function beforeSave($insert){
-        $this->type     = 'page';
-        if($insert){
-            $this->postdate = empty($this->postdate) ? Yii::$app->getModule('administrator')->dateTime->serverTime('Y-m-d H:i:s') : $this->postdate;
-        }else{
-            $this->modified = Yii::$app->getModule('administrator')->dateTime->serverTime('Y-m-d H:i:s');
-        }
-        $this->parent = !is_null($this->parent) ? $this->parent : '0';
-
-        return parent::beforeSave($insert);
-    }
-
-    public function afterSave($insert, $changedAttributes){
-        $oldSlug = isset($changedAttributes['slug']) ? $changedAttributes['slug'] : '';
-        $this->cachePage($oldSlug);
-        return parent::afterSave($insert, $changedAttributes);
     }
 
     /**
@@ -144,15 +122,15 @@ class Page extends \admin\db\WimaraAR
 
     public function getLayoutList(){
         $defaultLayoutPage = [
-            'homepage' => 'Home Page',
+            'homepage'  => 'Home Page',
             'singlepage' => 'Single Page',
-            'bloglist' => 'Bloglist',
-            'contact' => 'Contact Page',
-            'other' => 'Other'
+            'bloglist'  => 'Bloglist',
+            'contact'   => 'Contact Page',
+            'other'     => 'Other'
         ];
         // get layout from theme;
-        if(isset(Yii::$app->params['available_theme_layout'])){
-            $defaultLayoutPage = array_merge($defaultLayoutPage, Yii::$app->params['available_theme_layout']);
+        if(isset(Yii::$app->params['theme_layouts'])){
+            $defaultLayoutPage = array_merge($defaultLayoutPage, Yii::$app->params['theme_layout']);
         }
 
         return $defaultLayoutPage;
@@ -179,60 +157,7 @@ class Page extends \admin\db\WimaraAR
         return Page::updateAll(['status'=>'trash'], ['id'=>$pageIds]);
     }
 
-    public function cachePage($oldSlug){
-        $query = new Query();
-        $postby = $query->select('firstname, lastname, email')->from('user')->where(['id'=>$this->postby])->one();
-        $metas = $query->select('*')->from('post_meta')->where(['post_id'=>$this->id])->all();
-        $metas = \yii\helpers\ArrayHelper::map($metas, 'metakey', 'value');
-        $page  = [
-            'title' => $this->title,
-            'content' => $this->content,
-            'slug' => $this->slug,
-            'type' => $this->type,
-            'layout' => $this->layout,
-            'postdate' => $this->postdate,
-            'postby' => $postby,
-            'meta_data' => $metas
-        ];
-
-        $cache = Yii::$app->cache;
-        if(!empty($oldSlug) && ($oldSlug != $this->slug)){
-            $cache->delete($oldSlug);
-        }
-
-        $cache->set($this->slug, $page);
+    public function findPublishedPage(){
+        return self::find()->andWhere(['post.status' => 'publish']);
     }
-
-    public static function getPage($slug){
-
-        $depedency = new \yii\caching\DbDependency(['sql'=>"SELECT modified FROM ".self::tableName()." WHERE slug='{$slug}' LIMIT 1;"]);
-        return Yii::$app->cache->getOrSet($slug, function()use($slug){
-            $query = new Query();
-            $dataPage = $query->select('post.*, user.firstname, user.lastname, user.email')
-                        ->from(self::tableName())
-                        ->innerJoin(User::tableName(), self::tableName().'.postby='.User::tableName().'.id')
-                        ->where(['post.type'=>'page', 'post.slug'=>$slug, 'post.status'=>'publish']);
-            if($dataPage->count()==0){
-                throw new \yii\web\NotFoundHttpException("Page not found!");
-            }
-            $page = $dataPage->one();
-            $queryMeta  = new Query();
-            $postBy = ['firstname'=>$page['firstname'], 'lastname'=>$page['lastname'], 'email'=>$page['email']];
-            $metas  = $queryMeta->select('*')->from('post_meta')->where(['post_id'=>$page['id']])->all();
-            $metas  = \yii\helpers\ArrayHelper::map($metas, 'metakey', 'value');
-
-            return $result = [
-                'title' => $page['title'],
-                'content' => $page['content'],
-                'slug' => $page['slug'],
-                'type' => $page['type'],
-                'layout' => $page['layout'],
-                'postdate' => $page['postdate'],
-                'postby' => $postBy,
-                'meta_data' => $metas
-            ];
-        }, (3600*24*7), $depedency);
-
-    }
-
 }
