@@ -26,6 +26,8 @@ class AdminBootstrap implements \yii\base\BootstrapInterface{
             }
         }
 
+        $app->set('_adminFileCache', 'yii\caching\FileCache');
+
         $app->getUrlManager()->addRules($rules, TRUE);
         // $app->params = array_merge($app->params, require_once(Yii::getAlias('@themes/basic/config.php')));
 

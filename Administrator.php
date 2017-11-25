@@ -23,7 +23,7 @@ class Administrator extends \yii\base\Module
 
     public $defaultClientRoute = 'administrator/client';
     public $clientBehaviors = '';
-    public $publicLayout = '';
+    public $publicLayout = '@app/views/layouts/main';
     public $pageView    = 'page';
     public $postView    = 'post';
     public $archiveView = 'archive';
