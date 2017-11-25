@@ -11,7 +11,7 @@ use Yii;
  * @property string $key
  * @property string $value
  */
-class Options extends \yii\db\ActiveRecord
+class Options extends \admin\db\WimaraAR
 {
     /**
      * @inheritdoc
@@ -19,6 +19,18 @@ class Options extends \yii\db\ActiveRecord
     public static function tableName()
     {
         return 'web_options';
+    }
+
+    public function init(){
+        parent::init();
+
+        $attributes = $this->getCustomAttributes();
+        $attrkey    = array_keys($attributes);
+
+        $data = self::find()->where(['option_key' => $attrkey])->asArray()->all();
+        foreach ($data as $option) {
+            $this->setCustomAttribute($option['option_key'], $option['option_value']);
+        }
     }
 
     /**

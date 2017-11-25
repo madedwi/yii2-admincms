@@ -123,10 +123,9 @@ class Page extends \admin\db\WimaraAR
     public function getLayoutList(){
         $defaultLayoutPage = [
             'homepage'  => 'Home Page',
-            'singlepage' => 'Single Page',
             'bloglist'  => 'Bloglist',
             'contact'   => 'Contact Page',
-            'other'     => 'Other'
+            'singlepage' => 'Single Page',
         ];
         // get layout from theme;
         if(isset(Yii::$app->params['theme_layouts'])){

@@ -102,13 +102,22 @@ function renderMenu($menu) {
         $menus = [
             [
                 'label' => 'General',
-                'class' => 'genera',
+                'class' => 'general',
                 'url' => ['/administrator/configuration/general'],
                 'activeIf' => [
                     'mainUrl' => 'configuration',
                     'subUrl' => ['general']
                 ],
             ],
+            [
+                'label' => 'Frontend Menu',
+                'class' => 'frontend-menu',
+                'url' => ['/administrator/configuration/frontend-menu'],
+                'activeIf' => [
+                    'mainUrl' => 'configuration',
+                    'subUrl' => ['frontend-menu']
+                ]
+            ]
         ];
 
         $menus = array_merge($menus, $menuConfigurations);

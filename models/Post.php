@@ -50,9 +50,8 @@ class Post extends \admin\db\WimaraAR
         return [
             'postBehavior' => [
                 'class'         => PostBehavior::className(),
-                'attachedClass' => $this,
-                'defaultMetas'  => ['seo_keyword', 'seo_description', 'seo_title', 'header_img', 'enable_comment'],
-                'haveCustomMeta' => true,
+                'metaFromClient' => 'post_custom_meta',
+                'contentType' => 'post',
             ]
         ];
     }
@@ -93,9 +92,6 @@ class Post extends \admin\db\WimaraAR
     {
         return [
             'id' => 'ID',
-            //'parent' => 'Parent',
-            //'type' => 'Type',
-            //'layout' => 'Layout',
             'title' => 'Title',
             'content' => 'Content',
             'status' => 'Status',

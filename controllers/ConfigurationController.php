@@ -53,6 +53,13 @@ class ConfigurationController extends Controller
         ]);
     }
 
+    public function actionFrontendMenu(){
+
+        return $this->render('menu', [
+
+        ]);
+    }
+
     public function actionLayout(){
         $this->layout = 'layout-manager';
         return $this->render('layout', [
