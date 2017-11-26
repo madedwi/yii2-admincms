@@ -96,9 +96,14 @@ class PageController extends Controller
 
         $parent = $model->getParentList();
 
+        $categories = Tags::findCategory()->asArray()->all();
+        $tags       = Tags::findTag()->asArray()->all();
+
         return $this->render('form', [
             'parent' => $parent,
             'model' => $model,
+            'categories' => $categories,
+            'tags' => $tags,
         ]);
     }
 

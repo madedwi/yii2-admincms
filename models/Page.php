@@ -52,7 +52,8 @@ class Page extends \admin\db\WimaraAR
             [['parent'], 'exist', 'skipOnError' => true, 'targetClass' => Page::className(), 'targetAttribute' => ['parent' => 'id']],
             ['parent', 'default', 'value'=>0 ],
             [['title', 'content'], 'required'],
-            ['custom_metas' , 'safe']
+            ['custom_metas' , 'safe'],
+            ['blog_archives', 'safe']
         ];
 
         return $this->getBehavior('postBehavior')->rules($defRules);
@@ -77,12 +78,13 @@ class Page extends \admin\db\WimaraAR
                     'user.email' => 'author',
                     'seo_title' => 'Title Alias',
                     'seo_keyword' => 'Keyword',
-                    'description' => 'Content Description'
+                    'description' => 'Content Description',
+                    'blog_archives' => 'Assigned Archives'
                 ];
     }
 
     public function customAttributes(){
-        return ['seo_title', 'seo_keyword', 'seo_description', 'header_img'];
+        return ['seo_title', 'seo_keyword', 'seo_description', 'header_img', 'blog_archives'];
     }
 
     public function behaviors(){
@@ -123,7 +125,7 @@ class Page extends \admin\db\WimaraAR
     public function getLayoutList(){
         $defaultLayoutPage = [
             'homepage'  => 'Home Page',
-            'bloglist'  => 'Bloglist',
+            'archives'  => 'Archives Page',
             'contact'   => 'Contact Page',
             'singlepage' => 'Single Page',
         ];

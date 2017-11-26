@@ -21,7 +21,7 @@ class PageSearch extends Page
     {
         return [
             [['id', 'postby'], 'integer'],
-            [['title', 'content', 'type', 'status', 'layout', 'postdate', 'modified'], 'safe'],
+            [['title', 'content', 'type', 'status', 'layout', 'postdate', 'modified', 'slug'], 'safe'],
             [['meta', 'terms'], 'safe']
         ];
     }
@@ -98,7 +98,8 @@ class PageSearch extends Page
             return $dataProvider;
         }
         $query->andFilterWhere(['like', 'title', $this->title])
-            ->andFilterWhere(['like', 'content', $this->content]);
+            ->andFilterWhere(['like', 'content', $this->content])
+            ->andFilterWhere(['like', 'slug', $this->slug]);
 
         if(!is_null($this->meta)){
             $qmeta = $this->query->select('post_id')->from('post_meta')->groupBy('post_id');

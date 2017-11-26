@@ -4,7 +4,7 @@ namespace admin\components;
 use Yii;
 use admin\models\Terms;
 
-class PostAPI extends Api{
+class PostAPI extends API{
 
     protected $baseModel = NULL;
 
@@ -18,9 +18,9 @@ class PostAPI extends Api{
             if(in_array($key, $postMetaAttributes)){
                 $newConditions['meta'][$key] = $value;
             }else if($key == Terms::TYPE_CATEGORY){
-                $newConditions['terms']['category'] = $value;
+                $newConditions['terms_search']['category'] = $value;
             }else if($key == Terms::TYPE_TAG){
-                $newConditions['terms']['tag'] = $value;
+                $newConditions['terms_search']['tag'] = $value;
             }else{
                 $newConditions[$key] = $value;
             }

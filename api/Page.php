@@ -5,6 +5,7 @@ use Yii;
 use admin\components\PostAPI;
 use admin\models\Page as ModelPage;
 use admin\models\search\PageSearch;
+use admin\models\Terms;
 
 class Page extends PostAPI{
 
@@ -13,14 +14,6 @@ class Page extends PostAPI{
     public function __construct(){
         parent::__construct();
         $this->baseModel = new ModelPage();
-    }
-
-    public static function getInstance(){
-        if(is_null(static::$instance)){
-            static::$instance = new self();
-        }
-
-        return static::$instance;
     }
 
     public static function getPage(Array $filters = [], $limit=10){
@@ -32,6 +25,28 @@ class Page extends PostAPI{
         }
 
         $postDataProvider = $pageSearch->clientSearch($params, $limit);
+
+        if(count($postDataProvider->models) == 1){
+            $page = $postDataProvider->models[0];
+            if($page->layout == 'archives'){
+                $filters = [];
+                if($page->blog_archives != 'all'){
+                    if(($tag = Terms::findOne(['id'=>$page->blog_archives, 'type'=>Terms::TYPE_TAG])) !== null){
+                        $filters = ['tag' => $tag->terms_slug];
+                    }else if(($category = Terms::findOne(['id'=>$page->blog_archives, 'type'=>Terms::TYPE_CATEGORY])) !== null){
+                        $filters = ['category' => $category->terms_slug];
+                    }
+                }
+                $contents = Post::getPosts($filters);
+                $contents->prepare();
+                $page->setCustomAttribute('archived_contents',      $contents->models);
+                $page->setCustomAttribute('archived_shown',         $contents->count);
+                $page->setCustomAttribute('archived_total',         $contents->totalCount);
+                $page->setCustomAttribute('archived_pagination',    $contents->pagination);
+            }
+            $postDataProvider->setModels([0=>$page]);
+        }
+
         return $postDataProvider;
     }
 

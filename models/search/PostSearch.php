@@ -13,7 +13,7 @@ use admin\models\Post;
 class PostSearch extends Post
 {
     public $searchKeyword;
-    public $termsType, $termsSlug, $meta, $terms;
+    public $termsType, $termsSlug, $meta, $terms_search;
     /**
      * @inheritdoc
      */
@@ -22,9 +22,10 @@ class PostSearch extends Post
         return [
             [['id', 'parent', 'postby', 'postsort'], 'integer'],
             [['title', 'content', 'type', 'status', 'layout', 'postdate', 'modified'], 'safe'],
+            [['seo_title'], 'safe'],
             [['searchKeyword'], 'string', 'max'=>100],
             [['termsType', 'termsSlug'], 'string', 'max'=>50],
-            [['meta', 'terms'], 'safe']
+            [['meta', 'terms_search'], 'safe'],
         ];
     }
 
@@ -131,7 +132,8 @@ class PostSearch extends Post
         $query->andFilterWhere([
             'OR',
             ['like', 'post.tile', $this->title],
-            ['like', 'post.content', $this->content]
+            ['like', 'post.content', $this->content],
+            ['like', 'post.seo_title', $this->seo_title]
         ]);
 
         if(!empty($this->meta)){
@@ -144,8 +146,8 @@ class PostSearch extends Post
             $query->andWhere($whereMeta);
         }
 
-        if(!empty($this->terms)){
-            foreach ($this->terms as $key => $value) {
+        if(!empty($this->terms_search)){
+            foreach ($this->terms_search as $key => $value) {
                 $qterms = $this->query->select('post_id')->from('post_terms')->innerJoin('terms', 'post_terms.terms_id=terms.id')->groupBy('post_id');
                 $qterms->andWhere(['terms.type'=>$key, 'terms.terms_slug'=>$value]);
                 $qterms = $qterms->createCommand()->rawSql;

@@ -1,7 +1,7 @@
 <?php
 namespace admin\components;
 
- 
+
 use Yii;
 use yii\helpers\ArrayHelper;
 
@@ -39,5 +39,16 @@ class Media extends \yii\base\Component{
         $sizes = json_encode(array_merge($defaults, $from_client));
 
         return json_decode($sizes);
+    }
+
+    public function getImageUrl($url, $size = NULL){
+        $getSizes = $this->getImageSizes();
+        if(isset($getSizes->$size)){
+            $exp = explode('/', $url);
+            $filename = end($exp);
+            $url = str_replace($filename, "{$size}/{$filename}", $url);
+        }
+
+        return $url;
     }
 }

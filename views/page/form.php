@@ -17,6 +17,11 @@ $parentList = ArrayHelper::map($parent, 'id', 'title');
 $template = new AdminTemplate($this);
 $adminAsset = \admin\assets\AdminAsset::register($this);
 
+$categories = ArrayHelper::map($categories, 'id', 'terms');
+$tags = ArrayHelper::map($tags, 'id', 'terms');
+
+$archives = ['all'=>'All', 'Categories' => $categories, 'Tags' => $tags];
+
 if($model->isNewRecord){
     $model->status = 'publish';
     $model->layout = 'singlepage';
@@ -117,7 +122,9 @@ if($model->isNewRecord){
 
                         <?= $form->field($model, 'status')->dropDownList($model->statusList, ['prompt' => 'Status Halaman']) ?>
 
-                        <?= $form->field($model, 'layout')->dropDownList($model->layoutList, ['prompt' => 'Jenis Layout']) ?>
+                        <?= $form->field($model, 'layout')->dropDownList($model->layoutList, ['prompt' => 'Layout Type']) ?>
+
+                        <?= $form->field($model, 'blog_archives')->dropDownList($archives) ?>
 
                         <?= Html::tag('div',
                                         Html::tag('div',
@@ -162,7 +169,9 @@ if($model->isNewRecord){
 \admin\assets\MediaManagerAsset::register(Yii::$app->view);
 $script = <<<JAVASCRIPT
 
-
+    if($('#page-layout').val() !== 'archives'){
+        $('#page-blog_archives').closest('.form-group').hide();
+    }
 
 
     var med = MediaManager();
@@ -184,6 +193,14 @@ $script = <<<JAVASCRIPT
             $('.header-img>img').attr('src', image.fileurl);
         });
     })
+
+    $('#page-layout').on('change', function(e){
+        if(this.value == 'archives'){
+            $('#page-blog_archives').closest('.form-group').show();
+        }else{
+            $('#page-blog_archives').closest('.form-group').hide();
+        }
+    });
 
 JAVASCRIPT;
 
