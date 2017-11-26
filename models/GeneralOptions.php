@@ -131,8 +131,8 @@ class GeneralOptions extends Options{
         $defaultController = str_replace('controller', '', strtolower($defaultController));
         $routeArray = [
             '' =>  $defaultController. '/index',
-            "{$routeExp}" => $defaultController . '/post',
-            '<slug:[\w\-]+>' => $defaultController . '/page',
+            "{$routeExp}" => $defaultController . '/index',
+            '<slug:[\w\-]+>' => $defaultController . '/index',
             'archives/<category:[\w\-]+>' => $defaultController . '/archives',
             'archives/<year:\d+>/<month:\d+>' => $defaultController . '/archives',
             'archives/<year:\d+>' => $defaultController . '/archives'
