@@ -14,6 +14,10 @@ class PostSearch extends Post
 {
     public $searchKeyword;
     public $termsType, $termsSlug, $meta, $terms_search;
+
+    public $year, $month;
+
+    public $__executedQuery;
     /**
      * @inheritdoc
      */
@@ -21,11 +25,12 @@ class PostSearch extends Post
     {
         return [
             [['id', 'parent', 'postby', 'postsort'], 'integer'],
-            [['title', 'content', 'type', 'status', 'layout', 'postdate', 'modified'], 'safe'],
+            [['title', 'content', 'type', 'status', 'layout', 'postdate', 'modified', 'slug'], 'safe'],
             [['seo_title'], 'safe'],
             [['searchKeyword'], 'string', 'max'=>100],
             [['termsType', 'termsSlug'], 'string', 'max'=>50],
             [['meta', 'terms_search'], 'safe'],
+            [['year', 'month'], 'integer']
         ];
     }
 
@@ -104,29 +109,25 @@ class PostSearch extends Post
         return $dataProvider;
     }
 
-
-    public function clientSearch($params, $pageSize=20){
-
-
+    public function clientSearch($params=[], $pagination = NULL){
         $query = Post::publishedPostQuery()->select("post.*")->joinWith(['author', 'postTerms']);
 
-        $pagination = [
-            'pageSize' => $pageSize,
-        ];
-
-        $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort'=> ['defaultOrder' => ['publishdate'=>SORT_DESC]],
-            'pagination' => !$pageSize ? false : $pagination ,
-        ]);
+        if(is_array($pagination)){
+            $query->limit($pagination['limit'])->offset($pagination['offset']);
+        }else if(!is_null($pagination)){
+            $query->limit($pagination);
+            if(array_key_exists('page', $params)){
+                $query->offset((intval($params['page']) - 1) * $pagination);
+            }
+        }
+        $query->groupBy('post.id');
+        $query->orderBy(['post.publishdate' => SORT_DESC]);
 
         $this->load($params);
-
         $query->andFilterWhere(['!=', 'post.status', 'trash']);
         if (!$this->validate()) {
-            // uncomment the following line if you do not want to return any records when validation fails
-            // $query->where('0=1');
-            return $dataProvider;
+            $this->__executedQuery = clone $query;
+            return $query->all();
         }
 
         $query->andFilterWhere([
@@ -135,6 +136,15 @@ class PostSearch extends Post
             ['like', 'post.content', $this->content],
             ['like', 'post.seo_title', $this->seo_title]
         ]);
+
+        $query->andFilterWhere(['=','slug', $this->slug ]);
+        if(!empty($this->year) && !empty($this->month)){
+            $query->andWhere(" YEAR(post.publishdate) = {$this->year} AND MONTH(post.publishdate) = {$this->month}");
+        }else if(!empty($this->year)){
+            $query->andWhere(" YEAR(post.publishdate) = {$this->year} ");
+        }else if(!empty($this->month)){
+            $query->andWhere(" MONTH(post.publishdate) = {$this->month} ");
+        }
 
         if(!empty($this->meta)){
             $qmeta = $this->query->select('post_id')->from('post_meta')->groupBy('post_id');
@@ -156,6 +166,14 @@ class PostSearch extends Post
             }
         }
 
-        return $dataProvider;
+
+        $this->__executedQuery = clone $query;
+        return $query->all();
     }
+
+    public function countAllPost(){
+        $this->__executedQuery->limit(NULL)->offset(0);
+        return $this->__executedQuery->count();
+    }
+
 }

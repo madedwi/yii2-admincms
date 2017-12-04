@@ -73,7 +73,20 @@ String.prototype.slugify = function () {
         $('.slug-segment').each(function(i, elm){
             slug.push($(elm).html());
         });
-        $('.full-input-slug').val(slug.join('/'));
+        if($(document).find('#temp-cont').length > 0){
+            console.log('xxx');
+            $(document).find('#temp-cont').html($('#full-slug-text').html());
+        }else{
+            console.log('yyy');
+            $('body').append('<p id="temp-cont">'+$('#full-slug-text').html()+'</p>');
+        }
+        $(document).find("#temp-cont #slug-category").remove();
+
+        let x = $(document).find("#temp-cont").html();
+        $('#formated-slug').val(x);
+        $('.full-input-slug').val($(this).val()); //(slug.join('/'));
+    }).on('change', '#slug-category', function(e){
+        $('.slug-input').trigger('blur');
     });
 
     $(document).on('change', '.slug-source', function(e){

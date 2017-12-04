@@ -75,15 +75,17 @@ $adminAsset = admin\assets\AdminAsset::register($this);
                 <hr />
                 <?php
                     echo Html::beginTag('div', ['class'=>'form-group field-generaloptions-post_url_format']);
-                    echo Html::tag('label', 'Url Format', ['class'=>'control-label', 'for'=>'generaloptions-post_url_format']);
+                    echo Html::tag('label', 'Post Url Format', ['class'=>'control-label', 'for'=>'generaloptions-post_url_format']);
                     echo Html::activeTextInput($model, 'post_url_format', ['class'=>'form-control']);
                     echo Html::tag('div', '',['class'=>'help-block']);
                     echo Html::beginTag('div', ['class'=>'clearfix', 'style'=>'padding-left:15px;']);
-                        echo "{[category]} => use one of post categories.<br />";
-                        echo "{[publish_year]} => use publish date.<br />";
-                        echo "{[publish_month_numeric]} => use publish date.<br />";
-                        echo "{[publish_month_name]} => use publish date.<br />";
-                        echo "{[slug]} => auto generate from post title.<br />";
+                        echo "<i>Post url will always start by \"p/\", ex : http://www.domain.com/p/you-url-format.</i>";
+                        echo "<br /><br />URL segment keyword : <br />";
+                        echo "<span style=\"margin-left:10px; width:180px; display:inline-block;\">{[category]}</span> => use one of post categories.<br />";
+                        echo "<span style=\"margin-left:10px; width:180px; display:inline-block;\">{[publish_year]}</span> => use publish date.<br />";
+                        echo "<span style=\"margin-left:10px; width:180px; display:inline-block;\">{[publish_month_numeric]}</span> => use publish date.<br />";
+                        echo "<span style=\"margin-left:10px; width:180px; display:inline-block;\">{[publish_month_name]}</span> => use publish date.<br />";
+                        echo "<span style=\"margin-left:10px; width:180px; display:inline-block;\">{[slug]}</span> => auto generate from post title.<br />";
                     echo Html::endTag('div');
                     echo Html::endTag('div');
                 //$form->field($model, 'post_url_format')->textInput(['maxlength'=>true])->label('Url Format') ?>

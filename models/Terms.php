@@ -3,7 +3,7 @@
 namespace admin\models;
 
 use Yii;
-
+use admin\db\WimaraAR;
 /**
  * This is the model class for table "categories".
  *
@@ -13,7 +13,7 @@ use Yii;
  * @property string $category_description
  * @property string $parent
  */
-class Terms extends \yii\db\ActiveRecord
+class Terms extends WimaraAR
 {
 
     const SCENARIO_CATEGORY = 'category';
@@ -88,6 +88,10 @@ class Terms extends \yii\db\ActiveRecord
         }
     }
 
+    public function customAttributes(){
+        return ['assignedPageSlug', 'formattedSlug'];
+    }
+
     public static function findCategory(){
         return parent::find()->andWhere(['terms.type'=>self::TYPE_CATEGORY]);
     }
@@ -132,5 +136,30 @@ class Terms extends \yii\db\ActiveRecord
 
     public function getCategoryParent(){
         return self::findCategory()->andWhere(['parent' => 0])->asArray()->all();
+    }
+
+    public function getCategoriesParentOnly(){
+        return self::findCategory()->andWhere(['terms.parent' => 0]);
+    }
+
+    public function getChildsCategory(){
+        return $this->hasMany(Terms::className(), ['parent'=>'id'])->from(Terms::tableName() . ' as child');
+    }
+
+    public function getPosts(){
+        return $this->hasMany(Post::className(), ['id' => 'post_id'])->viaTable('post_terms', ['terms_id'=>'id']);
+    }
+
+    public function afterFind(){
+        parent::afterFind();
+        $query  = $this->query->select('post.slug')->from('post')->innerJoin('post_meta', 'post_meta.post_id=post.id')->where(['post.type'=>'page'])->andWhere(['post_meta.metakey' => 'blog_archives', 'post_meta.value'=>$this->id]);
+        $data   = $query->one();
+        $this->assignedPageSlug = $data['slug'];
+
+        if($this->type == static::TYPE_TAG){
+            $this->formattedSlug = '/archives/t/'. $this->terms_slug;
+        }else if($this->type == static::TYPE_CATEGORY){
+            $this->formattedSlug = '/archives/c/'. $this->terms_slug;
+        }
     }
 }

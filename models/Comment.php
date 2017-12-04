@@ -30,6 +30,7 @@ class Comment extends \yii\db\ActiveRecord
     public $comment_email, $comment_name, $comment_website;
     public $parent_title, $parent_type;
     public $commentReplys;
+    public $commentCount;
     /**
      * @inheritdoc
      */
@@ -56,6 +57,7 @@ class Comment extends \yii\db\ActiveRecord
             [['postby'], 'exist', 'skipOnError' => true, 'targetClass' => User::className(), 'targetAttribute' => ['postby' => 'id']],
             // ['parent', 'exist', 'targetClass'=>self::className(), 'targetAttribute'=>['parent'=>'id']],
             [['parent_title', 'parent_type', 'replys'], 'safe'],
+            [['commentCount'], 'safe']
         ];
     }
 
@@ -124,6 +126,14 @@ class Comment extends \yii\db\ActiveRecord
 
      public function getReplys(){
          return $this->hasMany(Comment::className(), ['parent'=>'id']);
+     }
+
+     public function countPostComment($post_id = NULL){
+         $cond = NULL;
+         if(!is_null($post_id)){
+            $cond = ['parent' => $post_id];
+         }
+         return self::find()->where($cond)->count();
      }
 
 }

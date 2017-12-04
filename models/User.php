@@ -302,6 +302,17 @@ class User extends WimaraAR implements IdentityInterface
 
             return $update->execute();
         }
+    }
 
+    public function toArray($fileds = [], $expands = [], $recursive = true){
+        $user = parent::toArray($fileds, $expands, $recursive);
+        unset($user['password_hash']);
+        unset($user['password_reset_token']);
+        unset($user['auth_key']);
+        unset($user['auth_key']);
+        unset($user['created_at']);
+        unset($user['status']);
+        unset($user['updated_at']);
+        return $user;
     }
 }

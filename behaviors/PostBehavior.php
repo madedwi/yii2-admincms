@@ -128,12 +128,13 @@ class PostBehavior extends \yii\base\Behavior{
     }
 
     public function beforeInsertPost($eventAction){
-        $this->owner->postdate = empty($this->owner->postdate) ? Yii::$app->controller->module->dateTime->serverTime('Y-m-d H:i:s') : $this->postdate;
-        $this->owner->modified = Yii::$app->controller->module->dateTime->serverTime('Y-m-d H:i:s');
+        $this->postby = Yii::$app->user->identity->id;
+        $this->owner->postdate = empty($this->owner->postdate) ? Yii::$app->wimaraDateTime->serverTime('Y-m-d H:i:s') : $this->postdate;
+        $this->owner->modified = Yii::$app->wimaraDateTime->serverTime('Y-m-d H:i:s');
     }
 
     public function beforeUpdatePost($eventAction){
-        $this->owner->modified = Yii::$app->controller->module->dateTime->serverTime('Y-m-d H:i:s');
+        $this->owner->modified = Yii::$app->wimaraDateTime->serverTime('Y-m-d H:i:s');
     }
 
 }

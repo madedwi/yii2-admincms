@@ -16,7 +16,17 @@ class Page extends PostAPI{
         $this->baseModel = new ModelPage();
     }
 
-    public static function getPage(Array $filters = [], $limit=10){
+    public static function getOne(Array $filters = []){
+        $page = static::getAll($filters,1);
+        if($page->models != null){
+            return $page->models[0]->toArray();
+        }else{
+            return false;
+        }
+
+    }
+
+    public static function getAll(Array $filters = [], $limit=10){
         $self = self::getInstance();
         $pageSearch = new PageSearch();
         $params = ['PageSearch' => []];
@@ -25,27 +35,6 @@ class Page extends PostAPI{
         }
 
         $postDataProvider = $pageSearch->clientSearch($params, $limit);
-
-        if(count($postDataProvider->models) == 1){
-            $page = $postDataProvider->models[0];
-            if($page->layout == 'archives'){
-                $filters = [];
-                if($page->blog_archives != 'all'){
-                    if(($tag = Terms::findOne(['id'=>$page->blog_archives, 'type'=>Terms::TYPE_TAG])) !== null){
-                        $filters = ['tag' => $tag->terms_slug];
-                    }else if(($category = Terms::findOne(['id'=>$page->blog_archives, 'type'=>Terms::TYPE_CATEGORY])) !== null){
-                        $filters = ['category' => $category->terms_slug];
-                    }
-                }
-                $contents = Post::getPosts($filters);
-                $contents->prepare();
-                $page->setCustomAttribute('archived_contents',      $contents->models);
-                $page->setCustomAttribute('archived_shown',         $contents->count);
-                $page->setCustomAttribute('archived_total',         $contents->totalCount);
-                $page->setCustomAttribute('archived_pagination',    $contents->pagination);
-            }
-            $postDataProvider->setModels([0=>$page]);
-        }
 
         return $postDataProvider;
     }
@@ -66,6 +55,17 @@ class Page extends PostAPI{
 
             return $postDataProvider->models;
         }, $timeLimit, $dbDependency);
+    }
+
+    public static function getArchives($page, $limit = 5){
+        // $filters = Yii::$app->request->queryParams;
+        $filters = [];
+        if($page['blog_archives'] != 'all'){
+            $cat = Terms::findCategory()->where(['id' => $page['blog_archives']])->asArray()->one();
+            $filters['category'] = $cat['terms_slug'];
+        }
+        $post = Post::getAll($filters, $limit);
+        return $post;
     }
 
 }

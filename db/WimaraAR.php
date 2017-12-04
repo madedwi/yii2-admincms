@@ -1,7 +1,9 @@
 <?php
 namespace admin\db;
 
-class WimaraAR extends \yii\db\ActiveRecord{
+use yii\db\ActiveRecord;
+
+class WimaraAR extends ActiveRecord{
 
     private $_custom_attributes = [];
 
@@ -79,43 +81,14 @@ class WimaraAR extends \yii\db\ActiveRecord{
     }
 
 
-    public function toArray($obj = NUll){
-        $array = [];
-        if(is_null($obj)){
-            $obj = $this;
-        }
-
-        foreach ($obj as $key => $value) {
-            if($value instanceof WimaraAR){
-                $value = $value->toArray();
-            }else if($value instanceof \yii\db\ActiveDataProvider){
-                $value = $this->toArray($value->models);
-            }else if(is_array($value)){
-                $value = $this->toArray($value);
-            }else if(is_object($value)){
-                $value = $this->toArray($value);
-            }
-            $array[$key] = $value;
-        }
-        if(isset($obj->customAttributes)){
-            foreach ($obj->customAttributes as $key => $value) {
-                if($value instanceof WimaraAR){
-                    $value = $value->toArray();
-                }else if($value instanceof \yii\db\ActiveDataProvider){
-                    $value = $this->toArray($value->models);
-                }else if(is_array($value)){
-                    $value = $this->toArray($value);
-                }else if(is_object($value)){
-                    $value = $this->toArray($value);
-                }
-                $array[$key] = $value;
-            }
+    public function toArray($fields = [], $expands = [], $recursive = true){
+        $array = parent::toArray($fields, $expands, $recursive);
+        
+        foreach ($this->customAttributes as $name => $value) {
+            $array[$name] = $value;
         }
 
         return $array;
-
     }
-
-
 
 }

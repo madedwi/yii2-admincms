@@ -11,7 +11,7 @@ class DateTime {
      */
 
     private $timeString;
-    private $serverTimeZone = 'GMT';
+    private $serverTimeZone = 'UTC';
 
     public function timeFromString($timeString){
         $this->timeString = $timeString;
@@ -19,21 +19,14 @@ class DateTime {
     }
 
     public function timeToServerZone($timeString){
-        $userTimezone   = new \DateTimeZone(Yii::$app->user->identity->timezone);
         $serverTime     = new \DateTime($timeString, new \DateTimeZone($this->serverTimeZone));
-        $offset         = $userTimezone->getOffset($serverTime);
-        $myInterval     = \DateInterval::createFromDateString((string)$offset . 'seconds');
-        $serverTime->add($myInterval);
         return $serverTime;
     }
 
     public function timeFromServerZone($timeString){
-        $userTimezone   = new \DateTimeZone(Yii::$app->user->identity->timezone);
+        $userTimezone   = new \DateTimeZone(Yii::$app->params['timezone']);
         $serverTime     = new \DateTime($timeString, new \DateTimeZone($this->serverTimeZone));
-        $offset         = $userTimezone->getOffset($serverTime);
-        $myInterval     = \DateInterval::createFromDateString((string)$offset . 'seconds');
-        $serverTime->sub($myInterval);
-        return $serverTime;
+        return $serverTime->setTimezone($userTimezone);
     }
 
     public function serverTime($timeString){

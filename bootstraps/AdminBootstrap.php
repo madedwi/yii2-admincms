@@ -6,6 +6,8 @@ use admin\models\GeneralOptions;
 
 class AdminBootstrap implements \yii\base\BootstrapInterface{
     public function bootstrap($app){
+        // date_default_timezone_set('UTC');
+
         $rules = [
             //-------------------------------------------------------------------------------------------------------------------------------
             '<module:administrator>' => '<module>/dashboard/index',
@@ -29,6 +31,8 @@ class AdminBootstrap implements \yii\base\BootstrapInterface{
         $app->set('_adminFileCache', 'yii\caching\FileCache');
 
         $app->set('registerMetaTag', 'admin\components\Meta');
+
+        $app->set('wimaraDateTime', 'admin\components\DateTime');
 
         $app->getUrlManager()->addRules($rules, TRUE);
         // $app->params = array_merge($app->params, require_once(Yii::getAlias('@themes/basic/config.php')));

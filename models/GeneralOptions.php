@@ -64,7 +64,7 @@ class GeneralOptions extends Options{
             [['web_title', 'web_tagline', 'post_url_format'], 'string', 'max'=>'70'],
             [['web_meta_description', 'web_meta_keyword'], 'string', 'max'=>120],
             [['favicon', 'header_logo_image'], 'string'],
-            [['timezone'], 'in', 'range'=>$this->supportedTimeZone],
+            [['timezone'], 'in', 'range'=>array_keys($this->supportedTimeZone)],
             [['date_format', 'time_format'], 'string', 'max'=>15],
             [['admin_email'],  'email'],
             [['custom_metas', 'lastModified'], 'safe'],
@@ -76,8 +76,8 @@ class GeneralOptions extends Options{
     public function getSupportedTimeZone(){
         return [
             'UTC'=>'UTC',
-            'ASIA/MAKASAR'=>'ASIA/MAKASAR',
-            'ASIA/JAKARTA'=>'ASIA/JAKARTA'
+            'Asia/Makassar'=>'ASIA/MAKASAR',
+            'Asia/Jakarta'=>'ASIA/JAKARTA'
         ];
     }
 
@@ -118,7 +118,7 @@ class GeneralOptions extends Options{
 
     public function generatePostUrlRoute(){
         // load route json file;
-        $routeExp = strtr($this->post_url_format, [
+        $routeExp = strtr('p/'.$this->post_url_format, [
             '{[' => '<',
             ']}' => '>',
             'publish_year' => 'year:\d+',
@@ -132,8 +132,10 @@ class GeneralOptions extends Options{
         $routeArray = [
             '' =>  $defaultController. '/index',
             "{$routeExp}" => $defaultController . '/index',
+            "<fpage:[\w\-]+>/{$routeExp}" => $defaultController . '/index',
             '<slug:[\w\-]+>' => $defaultController . '/index',
-            'archives/<category:[\w\-]+>' => $defaultController . '/archives',
+            'archives/c/<category:[\w\-]+>' => $defaultController . '/archives',
+            'archives/t/<tags:[\w\-]+>' => $defaultController . '/archives',
             'archives/<year:\d+>/<month:\d+>' => $defaultController . '/archives',
             'archives/<year:\d+>' => $defaultController . '/archives'
         ];

@@ -6,30 +6,40 @@ use yii\helpers\Html;
     <label for="slug" class="control-label">Pretty Url</label>
     <p>
         <?php
+
         $slugformat = empty($slugformat) ? '{[slug]}' : $slugformat;
         $expl   = explode('/', $slugformat);
         $_expl  = [];
         $_i     = 0;
+        $slug_pos = 0;
         foreach ($expl as $i=>$x) {
             if(strpos($x, '-') !== false){
                 $_x = explode('-', $x);
                 foreach ($_x as $_xi) {
                     $_expl[$_i] = $_xi;
+                    if(strpos($x, '{[slug]}')!== false){
+                        $slug_pos = $_i;
+                    }
                     $_i++;
                 }
                 $_i--;
             }else{
                 $_expl[$_i] = $x;
+                if(strpos($x, '{[slug]}')!== false){
+                    $slug_pos = $_i;
+                }
             }
             $_i ++;
         }
 
         $expl = $_expl;
-        $text = [];
+        // $text = [];
         $cx = [];
-        $slugSegment = [];
-        $currentSegment = 0;
 
+
+        $slugSegment =[]; //explode('/', $model->formattedSlug);
+        $currentSegment = 0;
+        $fullSlug = $slugformat;
         foreach ($expl as $slugKeyword) {
             $c = "";
             if($slugKeyword=="{[category]}"){
@@ -45,18 +55,23 @@ use yii\helpers\Html;
                             Html::tag('span', $textCategorySlug, ['class'=>'slug-click slug-segment', 'data'=>['input'=>'#slug-category']]) .
                             Html::dropDownList('slug-category', null, $slugCategories, ['class'=>'slug-input hidden', 'id'=>'slug-category'])
                         );
+
+                $fullSlug = str_replace('{[category]}', $c, $fullSlug);
                 $cx[] = $textCategorySlug;
             }else if(strtolower($slugKeyword)=="{[publish_year]}"){
                 $textYearSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('Y');
                 $c = Html::tag('span', $textYearSlug, ['class'=>'slug-publishyear slug-segment']);
+                $fullSlug = str_replace('{[publish_year]}', $c, $fullSlug);
                 $cx[] = $textYearSlug;
             }else if(strtolower($slugKeyword)=="{[publish_month_numeric]}"){
                 $textMonthSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('m');
                 $c = Html::tag('span', $textMonthSlug, ['class'=>'slug-publishmonthnumeric slug-segment']);
+                $fullSlug = str_replace('{[publish_month_numeric]}', $c, $fullSlug);
                 $cx[] = $textMonthSlug;
             }else if(strtolower($slugKeyword)=="{[publish_month_name]}"){
                 $textMonthNameSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('F');
                 $c = Html::tag('span', $textMonthNameSlug, ['class'=>'slug-publishmonthnumeric slug-segment']);
+                $fullSlug = str_replace('{[publish_month_name]}', $c, $fullSlug);
                 $cx[] = $textMonthNameSlug;
             }else if(strtolower($slugKeyword)=="{[slug]}"){
                 $slugText = '';
@@ -69,24 +84,34 @@ use yii\helpers\Html;
                 }else{
                     $slugText = \admin\helpers\String::slugify($model->title);
                 }
+
                 $c = Html::tag('span',
                             Html::tag('span', $slugText, ['class'=>'slug-click slug-segment', 'data'=>['input'=>'#slug-text']]) .
                             Html::textInput('slug', $slugText, ['class'=>'slug-input hidden', 'id'=>'slug-text']),
                             ['class'=>'slugtext']
                         );
+                $fullSlug = str_replace('{[slug]}', $c, $fullSlug);
                 $cx[] = $slugText;
             }else{
                 $c = Html::tag('span', strtolower($slugKeyword), ['class'=>'slug-segment']);
+                $fullSlug = preg_replace("/\{$slugKeyword}\//", "{$c}/", $fullSlug); //str_ireplace( strtolower($slugKeyword).'/', $c.'/', $fullSlug);
+                // $fullSlug = str_replace('{[category]}', $c, $fullSlug);
             }
 
-            $text[] = $c;
+            // $text[] = $c;
             $currentSegment++;
         }
-        echo $text = implode('/', $text);
+        // echo $text = implode('/', $text);
+        echo Html::tag('p', $fullSlug, ['id'=>'full-slug-text']);
         if(empty($model->$attribute)){
             $model->$attribute = implode('/', $cx);
         }
-        echo $form->field($model, 'slug')->hiddenInput(['class'=>'full-input-slug'])->label(false);
+        echo $form->field($model, 'slug', ['options'=>['class'=>['form-group field-slug has-success hidden']]])->textInput(['class'=>'full-input-slug'])->label(false);
+        if($model->hasCustomAttribute('formattedSlug')){
+            $model->formattedSlug = $fullSlug;
+            echo $form->field($model, 'formattedSlug', ['options'=>['class'=>['form-group field-formated-slug has-success hidden']]])->textInput(['id'=>'formated-slug'])->label(false);
+        }
+
         ?>
 
     </p>

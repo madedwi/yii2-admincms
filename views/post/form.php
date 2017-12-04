@@ -43,11 +43,13 @@ if($model->isNewRecord){
                         <?= $form->field($model, 'title')->textInput(['maxlength' => true, 'class'=>'form-control input-title slug-source', 'data'=>['slugspan'=>'.slugtext', 'createslug' => $model->isNewRecord]]) ?>
 
                         <?php // $form->field($model, 'slug')->textInput(['maxlength' => true]) ?>
+                        
                         <?= $this->render('@admin/views/layouts/slug-input', [
                                 'form' => $form,
                                 'model' => $model,
                                 'attribute' => 'slug',
-                                'slugformat' => $slugFormat
+                                'slugformat' => $slugFormat,
+                                'slugCategories' => $slugCategories
                             ])?>
 
                         <?= $form->field($model, 'content')->textarea(['rows' => 6, 'id'=>'page_content']) ?>
@@ -272,6 +274,8 @@ $script = <<<JAVASCRIPT
             });
         }
     });
+
+    $('.slug-input').trigger('blur');
 
 JAVASCRIPT;
 
