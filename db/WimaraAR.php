@@ -81,9 +81,9 @@ class WimaraAR extends ActiveRecord{
     }
 
 
-    public function toArray($fields = [], $expands = [], $recursive = true){
+    public function toArray(array $fields = [], array $expands = [], $recursive = true){
         $array = parent::toArray($fields, $expands, $recursive);
-        
+
         foreach ($this->customAttributes as $name => $value) {
             $array[$name] = $value;
         }
