@@ -1,0 +1,18 @@
+{
+    "name": "madedwi/yii2-admincms",
+    "description": "This is prototype of yii2 admin module for simple news cms",
+    "authors": [
+        {
+            "name": "I Made Dwi Asmara Putra",
+            "email": "putra.work@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^5.6 || ^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "admin\\": ""
+        }
+    }
+}
