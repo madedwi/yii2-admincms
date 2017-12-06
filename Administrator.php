@@ -7,6 +7,9 @@ use yii\helpers\ArrayHelper;
 /**
  * administrator module definition class
  */
+
+Yii::setAlias('@admin', dirname(__FILE__));
+
 class Administrator extends \yii\base\Module
 {
     /**
