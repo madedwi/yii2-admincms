@@ -43,7 +43,7 @@ if($model->isNewRecord){
                         <?= $form->field($model, 'title')->textInput(['maxlength' => true, 'class'=>'form-control input-title slug-source', 'data'=>['slugspan'=>'.slugtext', 'createslug' => $model->isNewRecord]]) ?>
 
                         <?php // $form->field($model, 'slug')->textInput(['maxlength' => true]) ?>
-                        
+
                         <?= $this->render('@admin/views/layouts/slug-input', [
                                 'form' => $form,
                                 'model' => $model,
@@ -74,8 +74,8 @@ if($model->isNewRecord){
 
 
                 <?php
-                if(isset(Yii::$app->params['post_metas'])){
-                    $custom_metas = Yii::$app->params['post_metas'];
+                if(isset(Yii::$app->params['post_custom_meta'])){
+                    $custom_metas = Yii::$app->params['post_custom_meta'];
                     foreach ($custom_metas as $metaGroup) {
                         echo '<div class="clearfix">';
                         $template->widgetBegin()

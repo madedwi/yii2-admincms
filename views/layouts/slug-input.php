@@ -59,17 +59,31 @@ use yii\helpers\Html;
                 $fullSlug = str_replace('{[category]}', $c, $fullSlug);
                 $cx[] = $textCategorySlug;
             }else if(strtolower($slugKeyword)=="{[publish_year]}"){
-                $textYearSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('Y');
+                if(!empty($model->publishdate)){
+                    $textYearSlug = date('Y', strtotime($model->publishdate));
+                }else{
+                    $textYearSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('Y');
+                }
                 $c = Html::tag('span', $textYearSlug, ['class'=>'slug-publishyear slug-segment']);
                 $fullSlug = str_replace('{[publish_year]}', $c, $fullSlug);
                 $cx[] = $textYearSlug;
             }else if(strtolower($slugKeyword)=="{[publish_month_numeric]}"){
-                $textMonthSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('m');
+                if(!empty($model->publishdate)){
+                    $textMonthSlug = date('m', strtotime($model->publishdate));
+                }else{
+                    $textMonthSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('m');
+                }
+
                 $c = Html::tag('span', $textMonthSlug, ['class'=>'slug-publishmonthnumeric slug-segment']);
                 $fullSlug = str_replace('{[publish_month_numeric]}', $c, $fullSlug);
                 $cx[] = $textMonthSlug;
             }else if(strtolower($slugKeyword)=="{[publish_month_name]}"){
-                $textMonthNameSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('F');
+                if(!empty($model->publishdate)){
+                    $textMonthNameSlug = date('F', strtotime($model->publishdate));
+                }else{
+                    $textMonthNameSlug = isset($slugSegment[$currentSegment]) && !empty($slugSegment[$currentSegment]) ? $slugSegment[$currentSegment] : date('F');
+                }
+                $textMonthNameSlug = strtolower($textMonthNameSlug);
                 $c = Html::tag('span', $textMonthNameSlug, ['class'=>'slug-publishmonthnumeric slug-segment']);
                 $fullSlug = str_replace('{[publish_month_name]}', $c, $fullSlug);
                 $cx[] = $textMonthNameSlug;

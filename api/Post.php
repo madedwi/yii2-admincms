@@ -85,7 +85,8 @@ class Post extends \admin\components\PostAPI
                                         'id', 'terms', 'terms_slug',
                                         'postCount' => function($model){
                                             return count($model->posts);
-                                        }
+                                        },
+                                        'formattedSlug'
                                     ]
                                 ]);
                             }
@@ -119,8 +120,8 @@ class Post extends \admin\components\PostAPI
         }
     }
 
-    public static function getShortDescription($text, $maxChar = 255){
-        return \admin\helpers\String::truncate($text, $maxChar, '');
+    public static function getShortDescription(Array $post, $maxChar = 255){
+        return \admin\helpers\String::truncate(strip_tags($post['content']), $maxChar, '');
     }
 
 }

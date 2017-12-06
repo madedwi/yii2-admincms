@@ -73,7 +73,7 @@ class Post extends \admin\db\WimaraAR
      */
     public function rules()
     {
-        return [
+        $defRules = [
             [['parent', 'postby', 'postsort', 'enable_comment', 'views'], 'integer'],
             [['title', 'slug'], 'required'],
             [['content', 'type', 'status', 'layout'], 'string'],
@@ -88,6 +88,8 @@ class Post extends \admin\db\WimaraAR
             ['formattedSlug', 'string'],
             ['custom_metas' , 'safe']
         ];
+
+        return $this->getBehavior('postBehavior')->rules($defRules);
     }
 
     /**

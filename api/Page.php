@@ -17,9 +17,10 @@ class Page extends PostAPI{
     }
 
     public static function getOne(Array $filters = []){
-        $page = static::getAll($filters,1);
-        if($page->models != null){
-            return $page->models[0]->toArray();
+        $pages = static::getAll($filters,1);
+        if($pages->models != null){
+            $page = $pages->models[0]->toArray();
+            return $page;
         }else{
             return false;
         }
