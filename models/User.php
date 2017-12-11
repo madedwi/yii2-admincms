@@ -304,7 +304,7 @@ class User extends WimaraAR implements IdentityInterface
         }
     }
 
-    public function toArray($fileds = [], $expands = [], $recursive = true){
+    public function toArray(array $fileds = [], array $expands = [], $recursive = true){
         $user = parent::toArray($fileds, $expands, $recursive);
         unset($user['password_hash']);
         unset($user['password_reset_token']);

@@ -391,7 +391,7 @@ class Post extends \admin\db\WimaraAR
         }
     }
 
-    public function toArray($fields = [], $expands = [], $recursive = true){
+    public function toArray(array $fields = [], array $expands = [], $recursive = true){
         $array = parent::toArray($fields, $expands, $recursive);
         $array['formattedPublishDate'] = $this->formattedPublishDate;
         $array['commentCount'] = $this->commentCount;
