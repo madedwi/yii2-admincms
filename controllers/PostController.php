@@ -117,11 +117,10 @@ class PostController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if($model->save()){
                 Yii::$app->session->setFlash('post', ['status'=>'success', 'message'=>'Halaman telah tersimpan.', 'icon'=>'fa-save']);
-                return $this->refresh();
+                return $this->redirect(['/administrator/content/post/' . $model->id . '/update']);
             }else{
                 $error = json_encode($model->getErrors());
                 Yii::$app->session->setFlash('post', ['status'=>'warning', 'message'=>'Terjadi kesalahan saat menyimpan halaman.' . $error, 'icon'=>'fa-save']);
-                return $this->refresh();
             }
         }
 
